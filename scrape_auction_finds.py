@@ -37,7 +37,7 @@ LOCAL_HOUSES = [
 ]
 
 EASYLIVE_BASE = "https://www.easyliveauction.com"
-SEARCH_URL    = f"{EASYLIVE_BASE}/catalogue/search/"
+SEARCH_URL    = f"{EASYLIVE_BASE}/catalogue/"
 
 # Local repo path on Mac Mini — update if different
 REPO_DIR = Path(os.path.expanduser("~/auction-finds"))
@@ -97,7 +97,7 @@ def scrape_term(session: requests.Session, term: str) -> list[dict]:
     seen_ids = set()
 
     for page in range(1, MAX_PAGES + 1):
-        params = {"q": term, "page": page}
+        params = {"searchTerm": term, "searchOption": 3, "page": page}
         try:
             r = session.get(SEARCH_URL, params=params, headers=HEADERS, timeout=20)
             r.raise_for_status()
