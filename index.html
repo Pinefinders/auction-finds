@@ -1,1 +1,48 @@
-<h1>Coming soon</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinefinders — Auction Finds</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f1eb; color: #2c2c2c; padding: 0 0 60px; }
+    header { background: #2c2c2c; color: #f5f1eb; padding: 18px 24px; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+    header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
+    header .meta { font-size: 0.8rem; opacity: 0.6; }
+    nav { background: #3a3a3a; padding: 10px 24px; display: flex; gap: 20px; }
+    nav a { color: #c8b89a; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+    nav a:hover { color: #fff; }
+    section { max-width: 1400px; margin: 32px auto 0; padding: 0 20px; }
+    h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #c8b89a; color: #2c2c2c; }
+    .count { font-weight: 400; font-size: 0.9rem; color: #888; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .card { background: #fff; border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; box-shadow: 0 1px 4px rgba(0,0,0,0.08); transition: transform 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.14); }
+    .card-img { width: 100%; aspect-ratio: 4/3; overflow: hidden; background: #e8e0d4; }
+    .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .no-img { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #aaa; }
+    .card-body { padding: 10px 12px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .title { font-size: 0.82rem; font-weight: 600; line-height: 1.35; color: #1a1a1a; }
+    .house { font-size: 0.75rem; color: #888; }
+    .meta { margin-top: auto; padding-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.72rem; }
+    .estimate { background: #2c2c2c; color: #fff; padding: 2px 7px; border-radius: 3px; font-weight: 600; }
+    .date { color: #666; padding: 2px 0; }
+    .empty { color: #888; font-size: 0.9rem; padding: 20px 0; }
+    footer { text-align: center; margin-top: 48px; font-size: 0.75rem; color: #aaa; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Pinefinders — Auction Finds</h1>
+    <span class="meta">Updated: Saturday 23 May 2026, 21:38 &nbsp;·&nbsp; Terms: pine, chair, bedside</span>
+  </header>
+  <nav>
+    <a href="#local">📍 Local (0)</a>
+    <a href="#uk-wide">🇬🇧 UK-Wide (0)</a>
+  </nav>
+  <section id="local"><h2>📍 Local</h2><p class="empty">No results found.</p></section>
+  <section id="uk-wide"><h2>🇬🇧 UK-Wide</h2><p class="empty">No results found.</p></section>
+  <footer>Pinefinders Old Pine Furniture Warehouse &nbsp;·&nbsp; pinefinders.github.io/auction-finds</footer>
+</body>
+</html>
