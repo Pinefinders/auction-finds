@@ -5,9 +5,19 @@ Reads existing data.json and emits index-v2.html (does NOT push to git).
 
 Once approved, the build_html() function gets folded back into scrape_auction_finds.py.
 """
-import json, os
+import json, os, re
 from pathlib import Path
 from datetime import datetime
+
+# Mirror of scrape_auction_finds.EXCLUDE_WORDS so the preview drops the same lots
+_EXCLUDE_WORDS = [
+    "new", "modern", "contemporary", "reproduction", "repro",
+    "mexican", "ikea", "flatpack", "flat-pack", "flat pack",
+]
+_EXCLUDE_RE = re.compile(r"\b(?:" + "|".join(re.escape(w) for w in _EXCLUDE_WORDS) + r")\b", re.IGNORECASE)
+
+def _is_excluded(title):
+    return bool(title) and bool(_EXCLUDE_RE.search(title))
 
 REPO_DIR      = Path(os.path.expanduser("~/auction-finds"))
 SEEN_FILE     = REPO_DIR / "seen_lots.json"
@@ -26,25 +36,29 @@ def load_seen():
     return set()
 
 
+# Stripped only as the *very last* token, in order. Never strip down
+# below 2 remaining words — keeps "london auctions" distinct from "london".
 _COMPANY_SUFFIXES = [
     " ltd", " limited", " llp", " plc",
-    " auctioneers and valuers", " auctioneers & valuers",
-    " auctioneers", " auctions", " auction",
+    " and valuers", " & valuers",
 ]
 
 
 def _normalize(name):
-    """Lowercase + strip common company suffixes for fuzzy matching."""
+    """Lowercase + strip trailing company/entity suffixes for fuzzy matching.
+    Conservative: never strip below 2 remaining words so 'London Auctions Ltd'
+    → 'london auctions' (not 'london')."""
     n = (name or "").strip().lower()
-    # strip trailing punctuation
     n = n.rstrip(".,;:·- ")
     changed = True
     while changed:
         changed = False
         for suf in _COMPANY_SUFFIXES:
             if n.endswith(suf):
-                n = n[: -len(suf)].strip()
-                changed = True
+                candidate = n[: -len(suf)].strip()
+                if len(candidate.split()) >= 2:
+                    n = candidate
+                    changed = True
     return n
 
 
@@ -68,9 +82,44 @@ def load_postcodes():
     return raw, norm
 
 
+def _find_truncated(name, raw):
+    """EasyLive truncates house names at ~21 chars with '...'. If the
+    incoming name ends in '...', try a prefix match against Ken's list.
+    Falls back to a normalized prefix match when a literal one is ambiguous.
+    Returns the matched record or None."""
+    if not name or not name.endswith("..."):
+        return None
+    stem = name[:-3].strip().lower()
+    if len(stem) < 6:  # too short to be reliable
+        return None
+
+    # Literal prefix match
+    matches = [info for full, info in raw.items() if full.lower().startswith(stem)]
+    if len(matches) == 1:
+        return matches[0]
+
+    # Normalized prefix match (handles cases like
+    # 'London Auctions Limited' → 'london auctions' matching 'London Auctions')
+    nstem = _normalize(name)
+    if nstem and len(nstem) >= 6:
+        nmatches = [info for full, info in raw.items() if _normalize(full).startswith(nstem)]
+        if len(nmatches) == 1:
+            return nmatches[0]
+        # And the reverse: stem starts with a known normalized name
+        rev = [info for full, info in raw.items() if nstem.startswith(_normalize(full)) and len(_normalize(full)) >= 6]
+        if len(rev) == 1:
+            return rev[0]
+
+    return None
+
+
 def house_meta(house, postcodes):
     raw, norm = postcodes
-    info = raw.get(house) or norm.get(_normalize(house))
+    info = (
+        raw.get(house)
+        or norm.get(_normalize(house))
+        or _find_truncated(house, raw)
+    )
     if not info:
         return {"postcode": None, "location": None, "map_url": None, "known": False}
     pc = info.get("postcode", "")
@@ -94,7 +143,17 @@ def card_html(lot, is_new, postcodes):
     )
     bid      = f'<span class="bid">Bid {lot["bid"]}</span>'           if lot.get("bid")       else ""
     estimate = f'<span class="estimate">Est {lot["estimate"]}</span>' if lot.get("estimate") else ""
-    timeleft = f'<span class="timeleft">⏱ {lot["time_left"]}</span>'  if lot.get("time_left") else ""
+
+    # Prefer the auction sale date (stable); fall back to time_left (stale, scrape-time)
+    sale_date = lot.get("sale_date") or ""
+    sale_raw  = (lot.get("sale_dates_raw") or "").replace('"', "'")
+    if sale_date:
+        tip = f' data-tip="📅 {sale_raw}"' if sale_raw and sale_raw != sale_date else ''
+        saledate_html = f'<span class="saledate"{tip}>📅 {sale_date}</span>'
+    elif lot.get("time_left"):
+        saledate_html = f'<span class="timeleft">⏱ {lot["time_left"]}</span>'
+    else:
+        saledate_html = ""
     new_badge = '<span class="new-badge">NEW</span>' if is_new else ""
 
     # House name with postcode tooltip + map link
@@ -111,7 +170,9 @@ def card_html(lot, is_new, postcodes):
             f'">{lot["house"]} <span class="pc">{h["postcode"]}</span></span>'
         )
     elif h["known"]:
-        house_html_str = f'<span class="house" data-tip="📍 {h["location"] or ""}"">{lot["house"]}</span>'
+        # Known house but no postcode (international, etc.)
+        loc = h["location"] or "location on file"
+        house_html_str = f'<span class="house" data-tip="🌍 {loc}">{lot["house"]} <span class="pc pc-intl">{loc}</span></span>'
     else:
         house_html_str = f'<span class="house unknown" data-tip="📍 postcode unknown">{lot["house"]} <span class="pc-unknown">?</span></span>'
 
@@ -121,7 +182,7 @@ def card_html(lot, is_new, postcodes):
       <div class="card-body">
         <p class="title">{lot['title']}</p>
         <p class="house-line">{house_html_str}</p>
-        <div class="meta">{bid}{estimate}{timeleft}</div>
+        <div class="meta">{bid}{estimate}{saledate_html}</div>
       </div>
     </a>"""
 
@@ -366,6 +427,10 @@ def build_html(local_lots, wide_lots, seen, search_terms, postcodes):
       padding: 1px 6px; border-radius: 4px;
       font-size: 0.65rem;
     }}
+    .pc-intl {{
+      background: rgba(120,120,120,0.15); color: var(--muted);
+      font-weight: 500;
+    }}
     .meta {{
       margin-top: 6px;
       display: flex; flex-wrap: wrap; gap: 5px;
@@ -374,6 +439,12 @@ def build_html(local_lots, wide_lots, seen, search_terms, postcodes):
     .bid {{ background: var(--new-bg); color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: 600; }}
     .estimate {{ background: var(--ink); color: var(--panel); padding: 2px 8px; border-radius: 4px; font-weight: 500; }}
     .timeleft {{ color: var(--muted); padding: 2px 0; }}
+    .saledate {{
+      color: var(--ink); padding: 2px 0;
+      font-weight: 500;
+      cursor: help;
+    }}
+    .saledate[data-tip] {{ border-bottom: 1px dotted var(--muted); }}
 
     .empty {{ color: var(--muted); font-size: 0.9rem; padding: 20px 0; }}
 
@@ -449,7 +520,11 @@ def main():
         print(f"ERROR: {DATA_FILE} not found. Run the scraper first.")
         return
 
-    lots = json.loads(DATA_FILE.read_text())
+    lots_raw = json.loads(DATA_FILE.read_text())
+    pre = len(lots_raw)
+    lots = [l for l in lots_raw if not _is_excluded(l.get("title", ""))]
+    if pre != len(lots):
+        print(f"  Filtered out {pre - len(lots)} non-antique lots (modern/new/repro/mexican/etc.)")
     seen = load_seen()
     postcodes = load_postcodes()
 
@@ -477,6 +552,7 @@ def main():
         if l.get("house")
         and l["house"] not in raw
         and _normalize(l["house"]) not in norm
+        and _find_truncated(l["house"], raw) is None
     }
     if unknown:
         print(f"  ⚠️  {len(unknown)} house(s) missing postcodes:")

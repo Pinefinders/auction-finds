@@ -3420,5 +3420,57 @@
     "postcode": "D12 V2YX",
     "location": "Walkinstown, Dublin 12",
     "address": "Unit 4 Finches Park, Long Mile Road"
+  },
+  "Henry's Auctions (Altona)": {
+    "postcode": "BT28 1RW",
+    "address": "Rosevale Industrial Estate, Lisburn BT28 1RW",
+    "lat": 54.506305,
+    "lng": -6.076325,
+    "url": "https://www.easyliveauction.com/auctioneers/altonaauctions/"
+  },
+  "Alastair Gibson Auctions": {
+    "postcode": "",
+    "location": "International",
+    "url": "https://www.easyliveauction.com/auctioneers/alastairgibsonauctions/"
+  },
+  "Antiques Ireland": {
+    "postcode": "",
+    "location": "Ireland",
+    "url": "https://www.easyliveauction.com/auctioneers/cityauctionrooms/"
+  },
+  "Mullen's Auctioneers": {
+    "postcode": "",
+    "location": "Ireland",
+    "url": "https://www.easyliveauction.com/auctioneers/mullenslaurelpark/"
+  },
+  "Northeast Auctions": {
+    "postcode": "",
+    "location": "USA",
+    "url": "https://www.easyliveauction.com/auctioneers/northeastauctions/"
+  },
+  "O'Donovan & Associates": {
+    "postcode": "",
+    "location": "Ireland",
+    "url": "https://www.easyliveauction.com/auctioneers/odonovan/"
+  },
+  "Sean Eacrett Auctions": {
+    "postcode": "",
+    "location": "Ireland",
+    "url": "https://www.easyliveauction.com/auctioneers/seaneacrettauctions/"
+  },
+  "Usher Auctions": {
+    "postcode": "",
+    "location": "Ireland",
+    "url": "https://www.easyliveauction.com/auctioneers/oliverusherauctioneersandvaluers/"
+  },
+  "Victor Mitchell Auctioneers": {
+    "postcode": "",
+    "location": "Ireland",
+    "url": "https://www.easyliveauction.com/auctioneers/victormitchellsauctioneers/"
+  },
+  "Wannenes Art Auctions": {
+    "postcode": "",
+    "location": "Italy",
+    "url": "https://www.easyliveauction.com/auctioneers/wannenesartauctions/"
   }
 }

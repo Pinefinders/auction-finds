@@ -6,6 +6,29 @@ from urllib.parse import urljoin
 
 SEARCH_TERMS = ["pine"]
 
+# Words that mark a lot as NOT antique. Matched as whole words,
+# case-insensitive, against the lot title.
+EXCLUDE_WORDS = [
+    "new",
+    "modern",
+    "contemporary",
+    "reproduction",
+    "repro",
+    "mexican",         # almost always 1990s-2000s mass-produced pine
+    "ikea",
+    "flatpack", "flat-pack", "flat pack",
+]
+_EXCLUDE_RE = re.compile(r"\b(?:" + "|".join(re.escape(w) for w in EXCLUDE_WORDS) + r")\b", re.IGNORECASE)
+
+
+def is_excluded(title):
+    """Return the matched exclude word, or None if the title is fine."""
+    if not title:
+        return None
+    m = _EXCLUDE_RE.search(title)
+    return m.group(0) if m else None
+
+
 LOCAL_HOUSES = [
     "churchill", "overture", "amersham",
     "bourne end", "jones & jacob", "jones and jacob", "tring market",
@@ -73,6 +96,13 @@ def parse_card(card):
     url     = urljoin(EASYLIVE_BASE, href) if href else ""
     lot_id  = hashlib.md5(url.encode()).hexdigest()[:12] if url else hashlib.md5(img_url.encode()).hexdigest()[:12]
 
+    # Auction ID (shared across all lots in the same sale)
+    auction_id = card.get("data-id", "")
+    if not auction_id:
+        # Fallback: middle hash of the lot URL is the auction slug
+        m = re.search(r'/lot/[^/]+/([^/]+)/', url)
+        auction_id = m.group(1) if m else ""
+
     # Title — the <p> inside a.no-hover
     title_el = card.select_one("a.no-hover p")
     title    = title_el.get_text(strip=True) if title_el else ""
@@ -110,21 +140,26 @@ def parse_card(card):
                 break
 
     return {
-        "id":        lot_id,
-        "title":     title,
-        "house":     house,
-        "estimate":  estimate,
-        "bid":       bid,
-        "time_left": time_left,
-        "url":       url,
-        "img_url":   img_url,
-        "img_file":  image_filename(img_url) if img_url else "",
+        "id":         lot_id,
+        "auction_id": auction_id,
+        "title":      title,
+        "house":      house,
+        "estimate":   estimate,
+        "bid":        bid,
+        "time_left":  time_left,
+        "sale_date":  "",        # populated after auction-level fetch
+        "sale_dates_raw": "",    # full block, for the v2 tooltip / future per-lot parsing
+        "url":        url,
+        "img_url":    img_url,
+        "img_file":   image_filename(img_url) if img_url else "",
         "local":     is_local(house),
     }
 
 
 def scrape_term(session, term):
     lots, seen_ids = [], set()
+    excluded_total = 0
+    excluded_samples = []  # (word, title) tuples for log
     for page in range(1, MAX_PAGES + 1):
         params = {"searchTerm": term, "searchOption": 3, "currentPage": page}
         try:
@@ -145,6 +180,7 @@ def scrape_term(session, term):
             break
 
         new = 0
+        page_excluded = 0
         for card in cards:
             try:
                 lot = parse_card(card)
@@ -154,14 +190,26 @@ def scrape_term(session, term):
             if not lot or lot["id"] in seen_ids:
                 continue
             seen_ids.add(lot["id"])
+            bad = is_excluded(lot["title"])
+            if bad:
+                excluded_total += 1
+                page_excluded += 1
+                if len(excluded_samples) < 8:
+                    excluded_samples.append((bad, lot["title"][:80]))
+                continue
             lot["search_term"] = term
             lots.append(lot)
             new += 1
 
-        log.info(f"  '{term}' page {page}: {len(cards)} cards, {new} new, {len(lots)} total")
+        log.info(f"  '{term}' page {page}: {len(cards)} cards, {new} kept, {page_excluded} excluded, {len(lots)} total")
         time.sleep(REQUEST_DELAY)
         if len(cards) < 10:
             break
+
+    if excluded_total:
+        log.info(f"  '{term}' excluded {excluded_total} lots by EXCLUDE_WORDS; samples:")
+        for word, title in excluded_samples:
+            log.info(f"    [{word}] {title}")
 
     return lots
 
@@ -267,6 +315,70 @@ def git_push(repo_dir):
     log.info("Git: pushed successfully")
 
 
+# --- Sale-date enrichment -------------------------------------------------
+# Sale-date strings come in several flavours:
+#   Timed:  "Ends Sun 24th May 2026 from 2pm BST"
+#   Live:   "Mon 25th May 2026 10am BST (Lots 1001 to 1502) Tue 26th May 2026 10am BST ..."
+# We capture the full block for the future, and a short summary for display.
+_SALE_DATE_RE = re.compile(
+    r'((?:Ends\s+)?(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d{1,2}\w{0,2}\s+'
+    r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+20\d{2}'
+    r'(?:\s+(?:from\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*(?:GMT|BST)?)?)',
+    re.IGNORECASE,
+)
+
+
+def fetch_sale_dates(session, sample_lot_url):
+    """Fetch one lot page from an auction, return (summary, raw_block).
+    summary = first date string, e.g. 'Sun 24th May 2026 from 2pm BST'
+    raw_block = the entire 'Sale Dates: ...' text, for the tooltip.
+    """
+    try:
+        r = session.get(sample_lot_url, headers=HEADERS, timeout=15)
+        r.raise_for_status()
+    except Exception as e:
+        log.debug(f"sale_dates fetch failed: {e}")
+        return ("", "")
+
+    soup = BeautifulSoup(r.text, "html.parser")
+    label = soup.find(string=re.compile(r'Sale Dates?:', re.IGNORECASE))
+    if not label:
+        return ("", "")
+    block = label.parent.parent if label.parent else None
+    if not block:
+        return ("", "")
+    raw = re.sub(r'\s+', ' ', block.get_text(' ', strip=True))
+    raw = re.sub(r'^Sale Dates?:\s*', '', raw, flags=re.IGNORECASE).strip()
+
+    # First date string from the block
+    m = _SALE_DATE_RE.search(raw)
+    summary = m.group(1).strip() if m else raw[:80]
+    return (summary, raw)
+
+
+def enrich_with_sale_dates(session, all_lots):
+    """For each unique auction_id, fetch one lot's page and apply the sale-date
+    info to every lot in that auction."""
+    # Group lots by auction_id
+    by_auction = {}
+    for lot in all_lots.values():
+        aid = lot.get("auction_id") or ""
+        if not aid:
+            continue
+        by_auction.setdefault(aid, []).append(lot)
+
+    log.info(f"Fetching sale dates for {len(by_auction)} auctions…")
+    for i, (aid, lots) in enumerate(by_auction.items(), 1):
+        sample = lots[0]
+        summary, raw = fetch_sale_dates(session, sample["url"])
+        for lot in lots:
+            lot["sale_date"] = summary
+            lot["sale_dates_raw"] = raw
+        if i % 25 == 0:
+            log.info(f"  sale-dates progress: {i}/{len(by_auction)}")
+        time.sleep(REQUEST_DELAY)
+
+
 def main():
     log.info("=== Pinefinders Auction Finds — starting ===")
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
@@ -283,6 +395,8 @@ def main():
             break
 
     log.info(f"Total unique lots: {len(all_lots)}")
+
+    enrich_with_sale_dates(session, all_lots)
 
     log.info("Downloading images…")
     for lot in all_lots.values():
