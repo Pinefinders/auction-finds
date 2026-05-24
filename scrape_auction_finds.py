@@ -4,7 +4,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
-SEARCH_TERMS = ["pine", "bedside"]
+SEARCH_TERMS = ["pine"]
 
 LOCAL_HOUSES = [
     "churchill", "overture", "amersham",
