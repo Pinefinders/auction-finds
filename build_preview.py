@@ -26,23 +26,62 @@ def load_seen():
     return set()
 
 
+_COMPANY_SUFFIXES = [
+    " ltd", " limited", " llp", " plc",
+    " auctioneers and valuers", " auctioneers & valuers",
+    " auctioneers", " auctions", " auction",
+]
+
+
+def _normalize(name):
+    """Lowercase + strip common company suffixes for fuzzy matching."""
+    n = (name or "").strip().lower()
+    # strip trailing punctuation
+    n = n.rstrip(".,;:·- ")
+    changed = True
+    while changed:
+        changed = False
+        for suf in _COMPANY_SUFFIXES:
+            if n.endswith(suf):
+                n = n[: -len(suf)].strip()
+                changed = True
+    return n
+
+
 def load_postcodes():
-    """Return dict of house name -> {postcode, location, address?}."""
-    if POSTCODES_FILE.exists():
-        try:
-            data = json.loads(POSTCODES_FILE.read_text())
-            return {k: v for k, v in data.items() if not k.startswith("_")}
-        except Exception:
-            return {}
-    return {}
+    """Return (raw_lookup, normalized_lookup). The normalized lookup maps
+    a stripped-name key to the same record, used as a fallback when the
+    exact house name doesn't match (e.g. 'Churchill Auctioneers' vs
+    'Churchill Auctions Ltd')."""
+    if not POSTCODES_FILE.exists():
+        return {}, {}
+    try:
+        data = json.loads(POSTCODES_FILE.read_text())
+    except Exception:
+        return {}, {}
+    raw = {k: v for k, v in data.items() if not k.startswith("_")}
+    norm = {}
+    for name, info in raw.items():
+        key = _normalize(name)
+        if key and key not in norm:
+            norm[key] = info
+    return raw, norm
 
 
 def house_meta(house, postcodes):
-    info = postcodes.get(house)
+    raw, norm = postcodes
+    info = raw.get(house) or norm.get(_normalize(house))
     if not info:
         return {"postcode": None, "location": None, "map_url": None, "known": False}
     pc = info.get("postcode", "")
-    loc = info.get("location", "")
+    # Build a friendly location string from address if no explicit location
+    loc = info.get("location") or ""
+    if not loc and info.get("address"):
+        # Use the address minus the trailing postcode for the tooltip subtitle
+        addr = info["address"]
+        if pc and pc in addr:
+            addr = addr.replace(pc, "").strip().rstrip(",")
+        loc = addr
     map_url = f"https://www.google.com/maps/search/?api=1&query={pc.replace(' ', '+')}" if pc else None
     return {"postcode": pc, "location": loc, "map_url": map_url, "known": True}
 
@@ -431,8 +470,14 @@ def main():
     print(f"  Open: file://{OUTPUT_FILE}")
     print(f"  Local: {len(local_lots)}  ·  UK-Wide: {len(wide_lots)}")
 
-    # Report unknown houses so Ken can fill them in
-    unknown = {l["house"] for l in lots if l.get("house") and l["house"] not in postcodes}
+    # Report unknown houses so Ken can fill them in (after fuzzy fallback)
+    raw, norm = postcodes
+    unknown = {
+        l["house"] for l in lots
+        if l.get("house")
+        and l["house"] not in raw
+        and _normalize(l["house"]) not in norm
+    }
     if unknown:
         print(f"  ⚠️  {len(unknown)} house(s) missing postcodes:")
         for h in sorted(unknown):

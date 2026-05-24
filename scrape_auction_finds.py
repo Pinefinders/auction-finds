@@ -27,7 +27,7 @@ HEADERS = {
 }
 
 REQUEST_DELAY = 1.5
-MAX_PAGES     = 5
+MAX_PAGES     = 30   # safety cap; pine typically returns ~16 pages
 MAX_LOTS      = 200
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)s  %(message)s", datefmt="%H:%M:%S")
@@ -126,9 +126,12 @@ def parse_card(card):
 def scrape_term(session, term):
     lots, seen_ids = [], set()
     for page in range(1, MAX_PAGES + 1):
-        params = {"searchTerm": term, "searchOption": 3, "page": page}
+        params = {"searchTerm": term, "searchOption": 3, "currentPage": page}
         try:
             r = session.get(SEARCH_URL, params=params, headers=HEADERS, timeout=20)
+            if r.status_code == 404:
+                log.info(f"  '{term}' page {page}: 404 (past last page) — stopping")
+                break
             r.raise_for_status()
         except Exception as e:
             log.warning(f"Request failed for '{term}' page {page}: {e}")
