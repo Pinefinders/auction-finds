@@ -39,6 +39,8 @@ EASYLIVE_BASE = "https://www.easyliveauction.com"
 SEARCH_URL    = f"{EASYLIVE_BASE}/catalogue/"
 REPO_DIR      = Path(os.path.expanduser("~/auction-finds"))
 IMAGES_DIR    = REPO_DIR / "images"
+SEEN_FILE     = REPO_DIR / "seen_lots.json"
+POSTCODES_FILE = REPO_DIR / "house_postcodes.json"
 
 HEADERS = {
     "User-Agent": (
@@ -214,38 +216,171 @@ def scrape_term(session, term):
     return lots
 
 
-def build_html(local_lots, wide_lots):
+# --- Seen-lots tracking ---------------------------------------------------
+def load_seen():
+    """Return set of lot IDs we've seen in previous runs."""
+    if SEEN_FILE.exists():
+        try:
+            return set(json.loads(SEEN_FILE.read_text()))
+        except Exception:
+            return set()
+    return set()
+
+
+def save_seen(lot_ids):
+    SEEN_FILE.write_text(json.dumps(sorted(lot_ids)), encoding="utf-8")
+
+
+# --- House postcode lookup / fuzzy matching -------------------------------
+_COMPANY_SUFFIXES = [
+    " ltd", " limited", " llp", " plc",
+    " and valuers", " & valuers",
+]
+
+
+def _normalize(name):
+    n = (name or "").strip().lower()
+    n = n.rstrip(".,;:·- ")
+    changed = True
+    while changed:
+        changed = False
+        for suf in _COMPANY_SUFFIXES:
+            if n.endswith(suf):
+                candidate = n[: -len(suf)].strip()
+                if len(candidate.split()) >= 2:
+                    n = candidate
+                    changed = True
+    return n
+
+
+def load_postcodes():
+    if not POSTCODES_FILE.exists():
+        return {}, {}
+    try:
+        data = json.loads(POSTCODES_FILE.read_text())
+    except Exception:
+        return {}, {}
+    raw = {k: v for k, v in data.items() if not k.startswith("_")}
+    norm = {}
+    for name, info in raw.items():
+        key = _normalize(name)
+        if key and key not in norm:
+            norm[key] = info
+    return raw, norm
+
+
+def _find_truncated(name, raw):
+    if not name or not name.endswith("..."):
+        return None
+    stem = name[:-3].strip().lower()
+    if len(stem) < 6:
+        return None
+    matches = [info for full, info in raw.items() if full.lower().startswith(stem)]
+    if len(matches) == 1:
+        return matches[0]
+    nstem = _normalize(name)
+    if nstem and len(nstem) >= 6:
+        nmatches = [info for full, info in raw.items() if _normalize(full).startswith(nstem)]
+        if len(nmatches) == 1:
+            return nmatches[0]
+        rev = [info for full, info in raw.items() if nstem.startswith(_normalize(full)) and len(_normalize(full)) >= 6]
+        if len(rev) == 1:
+            return rev[0]
+    return None
+
+
+def house_meta(house, postcodes):
+    raw, norm = postcodes
+    info = (
+        raw.get(house)
+        or norm.get(_normalize(house))
+        or _find_truncated(house, raw)
+    )
+    if not info:
+        return {"postcode": None, "location": None, "map_url": None, "known": False}
+    pc = info.get("postcode", "")
+    loc = info.get("location") or ""
+    if not loc and info.get("address"):
+        addr = info["address"]
+        if pc and pc in addr:
+            addr = addr.replace(pc, "").strip().rstrip(",")
+        loc = addr
+    map_url = f"https://www.google.com/maps/search/?api=1&query={pc.replace(' ', '+')}" if pc else None
+    return {"postcode": pc, "location": loc, "map_url": map_url, "known": True}
+
+
+# --- HTML rendering -------------------------------------------------------
+def _card_html(lot, is_new, postcodes):
+    img_src = f"images/{lot['img_file']}" if lot.get("img_file") else ""
+    img_tag = (
+        f'<img src="{img_src}" alt="{lot["title"]}" loading="lazy">'
+        if img_src else '<div class="no-img">No image</div>'
+    )
+    bid      = f'<span class="bid">Bid {lot["bid"]}</span>'           if lot.get("bid")       else ""
+    estimate = f'<span class="estimate">Est {lot["estimate"]}</span>' if lot.get("estimate") else ""
+
+    sale_date = lot.get("sale_date") or ""
+    sale_raw  = (lot.get("sale_dates_raw") or "").replace('"', "'")
+    if sale_date:
+        tip = f' data-tip="📅 {sale_raw}"' if sale_raw and sale_raw != sale_date else ''
+        saledate_html = f'<span class="saledate"{tip}>📅 {sale_date}</span>'
+    elif lot.get("time_left"):
+        saledate_html = f'<span class="timeleft">⏱ {lot["time_left"]}</span>'
+    else:
+        saledate_html = ""
+    new_badge = '<span class="new-badge">NEW</span>' if is_new else ""
+
+    h = house_meta(lot.get("house", ""), postcodes)
+    if h["known"] and h["map_url"]:
+        tooltip = f'📍 {h["postcode"]}'
+        if h["location"]:
+            tooltip += f' · {h["location"]}'
+        tooltip += ' · click for map'
+        house_html_str = (
+            f'<span class="house" data-tip="{tooltip}" '
+            f'onclick="event.preventDefault(); event.stopPropagation(); '
+            f"window.open('{h['map_url']}','_blank'); "
+            f'">{lot["house"]} <span class="pc">{h["postcode"]}</span></span>'
+        )
+    elif h["known"]:
+        loc = h["location"] or "location on file"
+        house_html_str = f'<span class="house" data-tip="🌍 {loc}">{lot["house"]} <span class="pc pc-intl">{loc}</span></span>'
+    else:
+        house_html_str = f'<span class="house unknown" data-tip="📍 postcode unknown">{lot["house"]} <span class="pc-unknown">?</span></span>'
+
+    return f"""
+    <a class="card" href="{lot['url']}" target="_blank" rel="noopener">
+      <div class="card-img">{img_tag}{new_badge}</div>
+      <div class="card-body">
+        <p class="title">{lot['title']}</p>
+        <p class="house-line">{house_html_str}</p>
+        <div class="meta">{bid}{estimate}{saledate_html}</div>
+      </div>
+    </a>"""
+
+
+def _section_html(title, lots, anchor, seen, postcodes, css_class=""):
+    if not lots:
+        return f'<section id="{anchor}" class="{css_class}"><h2>{title}</h2><p class="empty">No results found.</p></section>'
+    cards = "\n".join(_card_html(l, l["id"] not in seen, postcodes) for l in lots)
+    new_count = sum(1 for l in lots if l["id"] not in seen)
+    new_pill = f' <span class="new-count">{new_count} new</span>' if new_count else ""
+    return f"""
+    <section id="{anchor}" class="{css_class}">
+      <h2>{title} <span class="count">{len(lots)} lots</span>{new_pill}</h2>
+      <div class="masonry">{cards}</div>
+    </section>"""
+
+
+def build_html(local_lots, wide_lots, seen=None, postcodes=None):
+    if seen is None:
+        seen = set()
+    if postcodes is None:
+        postcodes = ({}, {})
     now       = datetime.now().strftime("%A %d %B %Y, %H:%M")
     terms_str = ", ".join(SEARCH_TERMS)
-
-    def card_html(lot):
-        img_src = f"images/{lot['img_file']}" if lot["img_file"] else ""
-        img_tag = (
-            f'<img src="{img_src}" alt="{lot["title"]}" loading="lazy">'
-            if img_src else '<div class="no-img">No image</div>'
-        )
-        bid      = f'<span class="bid">Bid: {lot["bid"]}</span>'         if lot["bid"]       else ""
-        estimate = f'<span class="estimate">Est: {lot["estimate"]}</span>' if lot["estimate"] else ""
-        timeleft = f'<span class="timeleft">{lot["time_left"]}</span>'   if lot["time_left"] else ""
-        return f"""
-        <a class="card" href="{lot['url']}" target="_blank" rel="noopener">
-          <div class="card-img">{img_tag}</div>
-          <div class="card-body">
-            <p class="title">{lot['title']}</p>
-            <p class="house">{lot['house']}</p>
-            <div class="meta">{bid}{estimate}{timeleft}</div>
-          </div>
-        </a>"""
-
-    def section_html(title, lots, anchor):
-        if not lots:
-            return f'<section id="{anchor}"><h2>{title}</h2><p class="empty">No results found.</p></section>'
-        cards = "\n".join(card_html(l) for l in lots)
-        return f"""
-      <section id="{anchor}">
-        <h2>{title} <span class="count">({len(lots)} lots)</span></h2>
-        <div class="grid">{cards}</div>
-      </section>"""
+    total     = len(local_lots) + len(wide_lots)
+    new_total = sum(1 for l in local_lots + wide_lots if l["id"] not in seen)
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -254,46 +389,247 @@ def build_html(local_lots, wide_lots):
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pinefinders — Auction Finds</title>
   <style>
+    :root {{
+      --bg: #faf7f2;
+      --panel: #ffffff;
+      --ink: #2a241d;
+      --muted: #8a7e6f;
+      --accent: #a8743a;
+      --accent-soft: #f4ead8;
+      --local-bg: #fdf6e8;
+      --local-border: #d9a85a;
+      --shadow: 0 1px 3px rgba(40,30,15,0.06), 0 4px 12px rgba(40,30,15,0.05);
+      --shadow-hover: 0 4px 10px rgba(40,30,15,0.10), 0 10px 28px rgba(40,30,15,0.10);
+      --radius: 10px;
+      --new-bg: #2c6e2c;
+    }}
+    @media (prefers-color-scheme: dark) {{
+      :root:not([data-theme="light"]) {{
+        --bg: #14110d;
+        --panel: #1f1b15;
+        --ink: #ede4d2;
+        --muted: #8a7e6f;
+        --accent: #d9a85a;
+        --accent-soft: #2a2218;
+        --local-bg: #2a2218;
+        --local-border: #d9a85a;
+        --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3);
+        --shadow-hover: 0 4px 10px rgba(0,0,0,0.5), 0 10px 28px rgba(0,0,0,0.4);
+      }}
+    }}
+    :root[data-theme="dark"] {{
+      --bg: #14110d;
+      --panel: #1f1b15;
+      --ink: #ede4d2;
+      --muted: #8a7e6f;
+      --accent: #d9a85a;
+      --accent-soft: #2a2218;
+      --local-bg: #2a2218;
+      --local-border: #d9a85a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3);
+      --shadow-hover: 0 4px 10px rgba(0,0,0,0.5), 0 10px 28px rgba(0,0,0,0.4);
+    }}
+
     *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-    body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f1eb; color: #2c2c2c; padding: 0 0 60px; }}
-    header {{ background: #2c2c2c; color: #f5f1eb; padding: 18px 24px; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }}
-    header h1 {{ font-size: 1.4rem; font-weight: 700; }}
-    header .meta {{ font-size: 0.8rem; opacity: 0.6; }}
-    nav {{ background: #3a3a3a; padding: 10px 24px; display: flex; gap: 20px; }}
-    nav a {{ color: #c8b89a; text-decoration: none; font-size: 0.9rem; font-weight: 500; }}
-    nav a:hover {{ color: #fff; }}
-    section {{ max-width: 1400px; margin: 32px auto 0; padding: 0 20px; }}
-    h2 {{ font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #c8b89a; }}
-    .count {{ font-weight: 400; font-size: 0.9rem; color: #888; }}
-    .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }}
-    .card {{ background: #fff; border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; box-shadow: 0 1px 4px rgba(0,0,0,0.08); transition: transform 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; }}
-    .card:hover {{ transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.14); }}
-    .card-img {{ width: 100%; aspect-ratio: 4/3; overflow: hidden; background: #e8e0d4; }}
-    .card-img img {{ width: 100%; height: 100%; object-fit: cover; display: block; }}
-    .no-img {{ width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #aaa; }}
-    .card-body {{ padding: 10px 12px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }}
-    .title {{ font-size: 0.82rem; font-weight: 600; line-height: 1.35; }}
-    .house {{ font-size: 0.75rem; color: #888; }}
-    .meta {{ margin-top: auto; padding-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.72rem; }}
-    .bid {{ background: #2c6e2c; color: #fff; padding: 2px 7px; border-radius: 3px; font-weight: 600; }}
-    .estimate {{ background: #2c2c2c; color: #fff; padding: 2px 7px; border-radius: 3px; }}
-    .timeleft {{ color: #888; padding: 2px 0; }}
-    .empty {{ color: #888; font-size: 0.9rem; padding: 20px 0; }}
-    footer {{ text-align: center; margin-top: 48px; font-size: 0.75rem; color: #aaa; }}
+    html, body {{ background: var(--bg); color: var(--ink); }}
+    body {{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 0 0 80px;
+      -webkit-font-smoothing: antialiased;
+    }}
+
+    header {{
+      background: var(--panel);
+      border-bottom: 1px solid var(--accent-soft);
+      padding: 20px 24px;
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }}
+    .brand {{ display: flex; align-items: baseline; gap: 12px; }}
+    .brand h1 {{ font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }}
+    .brand .logo {{ font-size: 1.5rem; }}
+    .meta {{ font-size: 0.78rem; color: var(--muted); margin-left: auto; }}
+    .meta strong {{ color: var(--ink); }}
+    .theme-toggle {{
+      background: var(--accent-soft); color: var(--ink);
+      border: none; cursor: pointer;
+      padding: 7px 12px; border-radius: 6px;
+      font-size: 0.85rem; font-family: inherit;
+    }}
+    .theme-toggle:hover {{ background: var(--accent); color: var(--panel); }}
+
+    nav.jump {{
+      max-width: 1500px; margin: 24px auto 0; padding: 0 24px;
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }}
+    nav.jump a {{
+      background: var(--panel); color: var(--ink);
+      border: 1px solid var(--accent-soft);
+      padding: 8px 14px; border-radius: 999px;
+      text-decoration: none; font-size: 0.85rem; font-weight: 500;
+      transition: all 0.15s;
+    }}
+    nav.jump a:hover {{ border-color: var(--accent); color: var(--accent); }}
+    nav.jump a.new-pill {{ background: var(--new-bg); color: #fff; border-color: var(--new-bg); }}
+
+    section {{ max-width: 1500px; margin: 36px auto 0; padding: 0 24px; }}
+    section.local-section {{
+      background: var(--local-bg);
+      border-left: 4px solid var(--local-border);
+      padding: 28px 24px 32px;
+      border-radius: var(--radius);
+      max-width: calc(1500px - 0px);
+      margin: 36px 24px 0;
+    }}
+    @media (min-width: 1548px) {{
+      section.local-section {{ margin: 36px auto 0; }}
+    }}
+    section h2 {{
+      font-size: 1.15rem; font-weight: 800;
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--accent-soft);
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }}
+    .count {{
+      font-weight: 500; font-size: 0.78rem; color: var(--muted);
+      background: var(--accent-soft); padding: 3px 9px; border-radius: 999px;
+    }}
+    .new-count {{
+      font-weight: 600; font-size: 0.72rem; color: #fff;
+      background: var(--new-bg); padding: 3px 9px; border-radius: 999px;
+    }}
+
+    .masonry {{ column-count: 5; column-gap: 18px; }}
+    @media (max-width: 1400px) {{ .masonry {{ column-count: 4; }} }}
+    @media (max-width: 1100px) {{ .masonry {{ column-count: 3; }} }}
+    @media (max-width: 760px)  {{ .masonry {{ column-count: 2; }} }}
+    @media (max-width: 460px)  {{ .masonry {{ column-count: 1; }} }}
+    .local-section .masonry {{ column-count: 4; }}
+    @media (max-width: 1400px) {{ .local-section .masonry {{ column-count: 3; }} }}
+    @media (max-width: 900px)  {{ .local-section .masonry {{ column-count: 2; }} }}
+    @media (max-width: 500px)  {{ .local-section .masonry {{ column-count: 1; }} }}
+
+    .card {{
+      display: inline-block; width: 100%;
+      margin: 0 0 18px;
+      background: var(--panel);
+      border-radius: var(--radius);
+      overflow: hidden;
+      text-decoration: none; color: inherit;
+      box-shadow: var(--shadow);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      break-inside: avoid;
+    }}
+    .card:hover {{ transform: translateY(-3px); box-shadow: var(--shadow-hover); }}
+    .card-img {{ position: relative; width: 100%; line-height: 0; background: var(--accent-soft); }}
+    .card-img img {{ width: 100%; height: auto; display: block; }}
+    .no-img {{
+      aspect-ratio: 4/3; display: flex; align-items: center;
+      justify-content: center; font-size: 0.8rem; color: var(--muted);
+    }}
+    .new-badge {{
+      position: absolute; top: 10px; left: 10px;
+      background: var(--new-bg); color: #fff;
+      font-size: 0.65rem; font-weight: 800;
+      padding: 4px 8px; border-radius: 4px;
+      letter-spacing: 0.06em;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }}
+    .card-body {{
+      padding: 12px 14px 14px;
+      display: flex; flex-direction: column; gap: 5px;
+    }}
+    .title {{
+      font-size: 0.88rem; font-weight: 600; line-height: 1.35;
+      color: var(--ink);
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }}
+    .house-line {{ font-size: 0.74rem; color: var(--muted); line-height: 1.3; }}
+    .house {{ position: relative; cursor: pointer; border-bottom: 1px dotted var(--muted); }}
+    .house:hover {{ color: var(--accent); border-bottom-color: var(--accent); }}
+    .house[data-tip]:hover::after {{
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 6px); left: 0;
+      background: var(--ink); color: var(--panel);
+      padding: 6px 10px; border-radius: 6px;
+      font-size: 0.72rem; white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 20; pointer-events: none;
+    }}
+    .house.unknown {{ opacity: 0.7; }}
+    .pc {{
+      display: inline-block; margin-left: 4px;
+      background: var(--accent-soft); color: var(--accent);
+      padding: 1px 6px; border-radius: 4px;
+      font-size: 0.65rem; font-weight: 600;
+    }}
+    .pc-unknown {{
+      display: inline-block; margin-left: 4px;
+      background: var(--accent-soft); color: var(--muted);
+      padding: 1px 6px; border-radius: 4px;
+      font-size: 0.65rem;
+    }}
+    .pc-intl {{ background: rgba(120,120,120,0.15); color: var(--muted); font-weight: 500; }}
+    .meta {{ margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px; font-size: 0.7rem; }}
+    .bid {{ background: var(--new-bg); color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: 600; }}
+    .estimate {{ background: var(--ink); color: var(--panel); padding: 2px 8px; border-radius: 4px; font-weight: 500; }}
+    .timeleft {{ color: var(--muted); padding: 2px 0; }}
+    .saledate {{ color: var(--ink); padding: 2px 0; font-weight: 500; cursor: help; }}
+    .saledate[data-tip] {{ border-bottom: 1px dotted var(--muted); }}
+
+    .empty {{ color: var(--muted); font-size: 0.9rem; padding: 20px 0; }}
+    footer {{ text-align: center; margin-top: 60px; padding: 0 24px; font-size: 0.75rem; color: var(--muted); }}
+    footer a {{ color: var(--accent); text-decoration: none; }}
   </style>
 </head>
 <body>
   <header>
-    <h1>Pinefinders — Auction Finds</h1>
-    <span class="meta">Updated: {now} &nbsp;·&nbsp; Terms: {terms_str}</span>
+    <div class="brand"><span class="logo">🩵</span><h1>Pinefinders Auction Finds</h1></div>
+    <span class="meta"><strong>{total} lots</strong> · {new_total} new since yesterday · Updated {now}</span>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
   </header>
-  <nav>
-    <a href="#local">📍 Local ({len(local_lots)})</a>
-    <a href="#uk-wide">🇬🇧 UK-Wide ({len(wide_lots)})</a>
+  <nav class="jump">
+    <a href="#local">📍 Local · {len(local_lots)}</a>
+    <a href="#uk-wide">🇬🇧 UK-Wide · {len(wide_lots)}</a>
+    {f'<a class="new-pill" href="#" onclick="filterNew(); return false;">✨ {new_total} new</a>' if new_total else ''}
   </nav>
-  {section_html("📍 Local", local_lots, "local")}
-  {section_html("🇬🇧 UK-Wide", wide_lots, "uk-wide")}
-  <footer>Pinefinders Old Pine Furniture Warehouse &nbsp;·&nbsp; pinefinders.github.io/auction-finds</footer>
+  {_section_html("📍 Local auctions", local_lots, "local", seen, postcodes, "local-section")}
+  {_section_html("🇬🇧 UK-Wide", wide_lots, "uk-wide", seen, postcodes, "")}
+  <footer>
+    Pinefinders Old Pine Furniture Warehouse · search terms: {terms_str}<br>
+    <a href="https://pinefinders.github.io/auction-finds">pinefinders.github.io/auction-finds</a>
+  </footer>
+  <script>
+    function toggleTheme() {{
+      const html = document.documentElement;
+      const cur = html.getAttribute('data-theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('pf-theme', next);
+      updateThemeBtn();
+    }}
+    function updateThemeBtn() {{
+      const btn = document.getElementById('themeBtn');
+      const isDark = (document.documentElement.getAttribute('data-theme') === 'dark') ||
+        (!document.documentElement.getAttribute('data-theme') &&
+         window.matchMedia('(prefers-color-scheme: dark)').matches);
+      btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+    }}
+    const saved = localStorage.getItem('pf-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    updateThemeBtn();
+    let newOnly = false;
+    function filterNew() {{
+      newOnly = !newOnly;
+      document.querySelectorAll('.card').forEach(c => {{
+        const isNew = c.querySelector('.new-badge');
+        c.style.display = (newOnly && !isNew) ? 'none' : '';
+      }});
+    }}
+  </script>
 </body>
 </html>"""
 
@@ -408,9 +744,31 @@ def main():
     wide_lots  = [l for l in all_lots.values() if not l["local"]]
     log.info(f"Local: {len(local_lots)}  UK-wide: {len(wide_lots)}")
 
-    (REPO_DIR / "index.html").write_text(build_html(local_lots, wide_lots), encoding="utf-8")
-    (REPO_DIR / "data.json").write_text(json.dumps(list(all_lots.values()), indent=2, ensure_ascii=False), encoding="utf-8")
+    # Load previously-seen lot IDs and postcode lookup
+    seen = load_seen()
+    postcodes = load_postcodes()
+    new_count = sum(1 for lot_id in all_lots if lot_id not in seen)
+    overlap   = len(seen.intersection(all_lots))
+    log.info(f"Seen-before: {overlap}  New since last run: {new_count}")
+    log.info(f"Postcode lookup: {len(postcodes[0])} houses")
+
+    (REPO_DIR / "index.html").write_text(
+        build_html(local_lots, wide_lots, seen=seen, postcodes=postcodes),
+        encoding="utf-8",
+    )
+    (REPO_DIR / "data.json").write_text(
+        json.dumps(list(all_lots.values()), indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
     log.info("HTML written")
+
+    # Update seen_lots.json with this run's lot IDs (union, capped at 5000)
+    updated_seen = (seen | set(all_lots.keys()))
+    # Keep the file from growing unboundedly: prefer recent IDs
+    if len(updated_seen) > 5000:
+        updated_seen = set(list(all_lots.keys())) | set(list(seen))[: 5000 - len(all_lots)]
+    save_seen(updated_seen)
+    log.info(f"Updated seen_lots.json ({len(updated_seen)} ids)")
 
     log.info("Pushing to GitHub…")
     git_push(REPO_DIR)
