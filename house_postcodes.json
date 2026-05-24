@@ -1,0 +1,56 @@
+{
+  "_comment": "Auction house -> postcode lookup. Keys must match the 'house' field as scraped. Unknown houses fall back to '?' in the UI.",
+  "Fosse Lane Auction": {
+    "postcode": "BA4 4PW",
+    "location": "Shepton Mallet, Somerset",
+    "address": "Unit 10 Centurion Business Centre, Fosse Lane"
+  },
+  "Auction Keynes": {
+    "postcode": "MK17 0EF",
+    "location": "Milton Keynes",
+    "address": "Unit 1"
+  },
+  "Beccles Auctions": {
+    "postcode": "NR34 7TD",
+    "location": "Beccles, Suffolk",
+    "address": "Unit 9"
+  },
+  "PSP Auctions": {
+    "postcode": "MK18 6AH",
+    "location": "Tingewick, Buckingham"
+  },
+  "South Dublin Auction": {
+    "postcode": "D12 V2YX",
+    "location": "Walkinstown, Dublin 12",
+    "address": "Unit 4 Finches Park, Long Mile Road"
+  },
+  "Stafford Auctions": {
+    "postcode": "ST16 3HR",
+    "location": "Stafford",
+    "address": "Unit 3"
+  },
+  "Churchill Auctioneers": {
+    "postcode": "OX9 3SE",
+    "location": "Thame, Oxon"
+  },
+  "Overture Auctions": {
+    "postcode": "HP16 9NP",
+    "location": "Great Missenden, Bucks"
+  },
+  "Amersham Auction Rooms": {
+    "postcode": "HP7 0AH",
+    "location": "Amersham, Bucks"
+  },
+  "Bourne End Auction Rooms": {
+    "postcode": "SL8 5QH",
+    "location": "Bourne End, Bucks"
+  },
+  "Jones & Jacob": {
+    "postcode": "OX49 5EJ",
+    "location": "Watlington, Oxon"
+  },
+  "Tring Market Auctions": {
+    "postcode": "HP23 5ED",
+    "location": "Tring, Herts"
+  }
+}

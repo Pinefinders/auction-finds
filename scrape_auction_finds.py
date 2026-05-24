@@ -9,6 +9,7 @@ SEARCH_TERMS = ["pine"]
 LOCAL_HOUSES = [
     "churchill", "overture", "amersham",
     "bourne end", "jones & jacob", "jones and jacob", "tring market",
+    "psp",
 ]
 
 EASYLIVE_BASE = "https://www.easyliveauction.com"

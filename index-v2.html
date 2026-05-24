@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinefinders — Auction Finds</title>
+  <style>
+    :root {
+      --bg: #faf7f2;
+      --panel: #ffffff;
+      --ink: #2a241d;
+      --muted: #8a7e6f;
+      --accent: #a8743a;
+      --accent-soft: #f4ead8;
+      --local-bg: #fdf6e8;
+      --local-border: #d9a85a;
+      --shadow: 0 1px 3px rgba(40,30,15,0.06), 0 4px 12px rgba(40,30,15,0.05);
+      --shadow-hover: 0 4px 10px rgba(40,30,15,0.10), 0 10px 28px rgba(40,30,15,0.10);
+      --radius: 10px;
+      --new-bg: #2c6e2c;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #14110d;
+        --panel: #1f1b15;
+        --ink: #ede4d2;
+        --muted: #8a7e6f;
+        --accent: #d9a85a;
+        --accent-soft: #2a2218;
+        --local-bg: #2a2218;
+        --local-border: #d9a85a;
+        --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3);
+        --shadow-hover: 0 4px 10px rgba(0,0,0,0.5), 0 10px 28px rgba(0,0,0,0.4);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #14110d;
+      --panel: #1f1b15;
+      --ink: #ede4d2;
+      --muted: #8a7e6f;
+      --accent: #d9a85a;
+      --accent-soft: #2a2218;
+      --local-bg: #2a2218;
+      --local-border: #d9a85a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3);
+      --shadow-hover: 0 4px 10px rgba(0,0,0,0.5), 0 10px 28px rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--bg); color: var(--ink); }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 0 0 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--accent-soft);
+      padding: 20px 24px;
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .brand {
+      display: flex; align-items: baseline; gap: 12px;
+    }
+    .brand h1 {
+      font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;
+    }
+    .brand .logo { font-size: 1.5rem; }
+    .meta {
+      font-size: 0.78rem; color: var(--muted);
+      margin-left: auto;
+    }
+    .meta strong { color: var(--ink); }
+    .theme-toggle {
+      background: var(--accent-soft); color: var(--ink);
+      border: none; cursor: pointer;
+      padding: 7px 12px; border-radius: 6px;
+      font-size: 0.85rem; font-family: inherit;
+    }
+    .theme-toggle:hover { background: var(--accent); color: var(--panel); }
+
+    nav.jump {
+      max-width: 1500px; margin: 24px auto 0; padding: 0 24px;
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    nav.jump a {
+      background: var(--panel); color: var(--ink);
+      border: 1px solid var(--accent-soft);
+      padding: 8px 14px; border-radius: 999px;
+      text-decoration: none; font-size: 0.85rem; font-weight: 500;
+      transition: all 0.15s;
+    }
+    nav.jump a:hover { border-color: var(--accent); color: var(--accent); }
+    nav.jump a.new-pill { background: var(--new-bg); color: #fff; border-color: var(--new-bg); }
+
+    section {
+      max-width: 1500px; margin: 36px auto 0; padding: 0 24px;
+    }
+    section.local-section {
+      background: var(--local-bg);
+      border-left: 4px solid var(--local-border);
+      padding: 28px 24px 32px;
+      border-radius: var(--radius);
+      max-width: calc(1500px - 0px);
+      margin: 36px 24px 0;
+    }
+    @media (min-width: 1548px) {
+      section.local-section { margin: 36px auto 0; }
+    }
+    section h2 {
+      font-size: 1.15rem; font-weight: 800;
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--accent-soft);
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .count {
+      font-weight: 500; font-size: 0.78rem; color: var(--muted);
+      background: var(--accent-soft); padding: 3px 9px; border-radius: 999px;
+    }
+    .new-count {
+      font-weight: 600; font-size: 0.72rem; color: #fff;
+      background: var(--new-bg); padding: 3px 9px; border-radius: 999px;
+    }
+
+    /* CSS columns masonry — natural aspect ratios, no JS */
+    .masonry {
+      column-count: 5;
+      column-gap: 18px;
+    }
+    @media (max-width: 1400px) { .masonry { column-count: 4; } }
+    @media (max-width: 1100px) { .masonry { column-count: 3; } }
+    @media (max-width: 760px)  { .masonry { column-count: 2; } }
+    @media (max-width: 460px)  { .masonry { column-count: 1; } }
+
+    /* Local section gets bigger cards = fewer columns */
+    .local-section .masonry { column-count: 4; }
+    @media (max-width: 1400px) { .local-section .masonry { column-count: 3; } }
+    @media (max-width: 900px)  { .local-section .masonry { column-count: 2; } }
+    @media (max-width: 500px)  { .local-section .masonry { column-count: 1; } }
+
+    .card {
+      display: inline-block; width: 100%;
+      margin: 0 0 18px;
+      background: var(--panel);
+      border-radius: var(--radius);
+      overflow: hidden;
+      text-decoration: none; color: inherit;
+      box-shadow: var(--shadow);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      break-inside: avoid;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+    .card-img {
+      position: relative;
+      width: 100%; line-height: 0;
+      background: var(--accent-soft);
+    }
+    .card-img img {
+      width: 100%; height: auto; display: block;
+    }
+    .no-img {
+      aspect-ratio: 4/3; display: flex; align-items: center;
+      justify-content: center; font-size: 0.8rem; color: var(--muted);
+    }
+    .new-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--new-bg); color: #fff;
+      font-size: 0.65rem; font-weight: 800;
+      padding: 4px 8px; border-radius: 4px;
+      letter-spacing: 0.06em;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .card-body {
+      padding: 12px 14px 14px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .title {
+      font-size: 0.88rem; font-weight: 600; line-height: 1.35;
+      color: var(--ink);
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .house-line {
+      font-size: 0.74rem; color: var(--muted);
+      line-height: 1.3;
+    }
+    .house {
+      position: relative; cursor: pointer;
+      border-bottom: 1px dotted var(--muted);
+    }
+    .house:hover { color: var(--accent); border-bottom-color: var(--accent); }
+    .house[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 6px); left: 0;
+      background: var(--ink); color: var(--panel);
+      padding: 6px 10px; border-radius: 6px;
+      font-size: 0.72rem; white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 20; pointer-events: none;
+    }
+    .house.unknown { opacity: 0.7; }
+    .pc {
+      display: inline-block; margin-left: 4px;
+      background: var(--accent-soft); color: var(--accent);
+      padding: 1px 6px; border-radius: 4px;
+      font-size: 0.65rem; font-weight: 600;
+    }
+    .pc-unknown {
+      display: inline-block; margin-left: 4px;
+      background: var(--accent-soft); color: var(--muted);
+      padding: 1px 6px; border-radius: 4px;
+      font-size: 0.65rem;
+    }
+    .meta {
+      margin-top: 6px;
+      display: flex; flex-wrap: wrap; gap: 5px;
+      font-size: 0.7rem;
+    }
+    .bid { background: var(--new-bg); color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+    .estimate { background: var(--ink); color: var(--panel); padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+    .timeleft { color: var(--muted); padding: 2px 0; }
+
+    .empty { color: var(--muted); font-size: 0.9rem; padding: 20px 0; }
+
+    footer {
+      text-align: center; margin-top: 60px; padding: 0 24px;
+      font-size: 0.75rem; color: var(--muted);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="logo">🪵</span>
+      <h1>Pinefinders Auction Finds</h1>
+    </div>
+    <span class="meta">
+      <strong>60 lots</strong> · 30 new since yesterday · Updated Sunday 24 May 2026, 09:41
+    </span>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+  </header>
+
+  <nav class="jump">
+    <a href="#local">📍 Local · 0</a>
+    <a href="#uk-wide">🇬🇧 UK-Wide · 60</a>
+    <a class="new-pill" href="#" onclick="filterNew(); return false;">✨ 30 new</a>
+  </nav>
+
+  <section id="local" class="local-section"><h2>📍 Local auctions</h2><p class="empty">No results found.</p></section>
+  
+    <section id="uk-wide" class="">
+      <h2>🇬🇧 UK-Wide <span class="count">60 lots</span> <span class="new-count">30 new</span></h2>
+      <div class="masonry">
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/580966dfb8a04d957a50dd13374ee60a/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-410/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/767146555618.jpg" alt="Pine four drawer Chest of Drawers" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine four drawer Chest of Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £10</span><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 5m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/48b1908416100f7b0a541727285a17be/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-411/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/2d9168155365.jpg" alt="Pine Chest" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine Chest</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 5m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/14d6c314c607ab8e1778098038ce7795/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-415/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/8735c6104968.jpg" alt="Pine 4 Drawer Graduated Chest of Drawers" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine 4 Drawer Graduated Chest of Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £9</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 7m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/73c4e1c41696ac8362cfbaff592fa1b6/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-419/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/943c73e22ef8.jpg" alt="Rustic Pine Coffee Table" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Rustic Pine Coffee Table</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 8m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/61d71ad84ff1922254d4efdc0cda0c13/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-423/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/2104e77fefc5.jpg" alt="Pine Chest of Drawers" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Chest of Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 9m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/eeda7194833060635627a215bf2b10d2/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-424/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/9f106e07aef0.jpg" alt="Pine Cabinet with Drawers" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine Cabinet with Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £13</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 10m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5b5f312d6fc87cafbae55154de84a4de/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-426/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/6a1f18a01971.jpg" alt="Pine Cabinet with Glass Door" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Cabinet with Glass Door</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £17</span><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 10m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/88256db96ac69de6426ba536cc993461/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-429/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/1e009755ba3c.jpg" alt="Rustic Pine Stool" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Rustic Pine Stool</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 11m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/a88f1cbfb4b5986bb4e90c99da317fbf/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-433/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/157381126240.jpg" alt="Pine Chest of Drawers" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Chest of Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 13m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/0d68a75c3bb862cb8bdf7f22b8b8fe63/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-434/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/e37fca866ff5.jpg" alt="Lot of 2 Pine Bedside Cabinets" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Lot of 2 Pine Bedside Cabinets</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £11</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 13m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/a4eada2cf29b4f9e014dbf1f2cd916b4/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-436/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/ebdee3629026.jpg" alt="Pine Dressing Mirror with Drawers" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Dressing Mirror with Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 14m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/abb7f744ef52af14d49a05a2d53cf6d1/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-437/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/971ca305aae6.jpg" alt="Lot of 4 Farmhouse Style Spoke Back Pine Chairs" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Lot of 4 Farmhouse Style Spoke Back Pine Chairs</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £21</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 14m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5ffd9610eff30c20e2664770e6e68c7e/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-445/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/34c420ea070e.jpg" alt="Pine Bedside Cabinet" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Bedside Cabinet</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 16m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/7bfbd0f8329e9afa18c5e4750bee3781/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-448/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/49f0e5f6752e.jpg" alt="Pine Hutch Dresser with Shelves and Drawers" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine Hutch Dresser with Shelves and Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 17m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/0ee1ff5250ae996c48fd823399927aba/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-450/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/6ada2aa7cca3.jpg" alt="Pine Shelving Unit" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Shelving Unit</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 18m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/2eb9f3177bf27ce4dfbb0d046ef90a25/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-451/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/012fd2b0ec4e.jpg" alt="Pine Shelving Unit" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine Shelving Unit</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 18m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/ad936a33c2a6a6813896bd807a463d55/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-462/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/f77adf641592.jpg" alt="Pine Drop-Leaf Table" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Drop-Leaf Table</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 22m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/aeeb67f8f9cbeb188645e995fbdee385/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-464/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/275260b9481c.jpg" alt="Pine Folding Wall Shelf" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine Folding Wall Shelf</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 23m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/a6da18ac2876ee089d02f195ea89badc/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-468/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/94239da00517.jpg" alt="rustic solid pine extendable table with four chairs" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">rustic solid pine extendable table with four chairs</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 24m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/954a2f994303e025fa5adbf93b0ba7d2/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-469/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/49e9dedd4134.jpg" alt="Chest of Pine Drawers" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Chest of Pine Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 24m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5fbdda882b7e3281dd1677efde73ddab/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-471/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/ab9276ab5858.jpg" alt="Pine Drop Leaf Table" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Drop Leaf Table</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 25m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/a1431e4cd7c1d65d37bc0b9b0464ca57/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-475/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/242cbf8a8971.jpg" alt="Lot of 3 Pine Nesting Tables" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Lot of 3 Pine Nesting Tables</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 26m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/bf3a2fca4c7c5782c58da5dc53055da1/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-477/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/7c147e3f30a4.jpg" alt="Pine Wardrobe with Drawers" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Wardrobe with Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 27m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/719c248afed4ce1397d8777b2ec90c52/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-478/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/bccc48d795be.jpg" alt="Pine Wardrobe with Drawers" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine Wardrobe with Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 27m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/ee2ea4cdb6bd9e01e061d1f3ab40bd03/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-479/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/4fa2c8294dc1.jpg" alt="Pine Chest of Drawers" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Chest of Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £12</span><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 28m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/16700d13a3df512885de241e654dc2af/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-480/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/7d09310b196b.jpg" alt="Lot of 2 Pine Benches" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Lot of 2 Pine Benches</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £11</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 28m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/4cb1e59e801b57e2dad25dede7155fbc/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-481/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/8ac203eb9605.jpg" alt="Pine Display Cabinet with Glass Doors" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Display Cabinet with Glass Doors</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £13</span><span class="estimate">Est £40 
+																					- 
+																					£60</span><span class="timeleft">⏱ 6h 28m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/f6c5f00668e8f91aa9fcb7f93794e538/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-482/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/ed858952ba83.jpg" alt="Lot of 2 Goldin Pine Nesting Tables" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Lot of 2 Goldin Pine Nesting Tables</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 29m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/fc57092fd4c3a57b35d642443ea2fd00/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-484/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/40ae50668190.jpg" alt="Victoria Dural Ltd Pine Cabinet" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Victoria Dural Ltd Pine Cabinet</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 29m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/e03b3ffc447a581fa8fe13661f432338/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-485/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/1f52229eeb4c.jpg" alt="Lot of 2 Pine Chest of Drawers" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Lot of 2 Pine Chest of Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 30m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/7a366b1073170f4930b23ee1161c9e16/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-506/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/dbf92e2fab45.jpg" alt="Pine Cabinet with Hinged Door" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Cabinet with Hinged Door</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 34m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/7aefa11acb26279774824ce84699d789/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-553/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/15090ee2de83.jpg" alt="Pair of Pine Chairs" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pair of Pine Chairs</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 6h 40m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/17106b79846874ab8338b011988d64f5/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-556/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/70c5384b63ce.jpg" alt="Pine Display Cabinet" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Display Cabinet</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 41m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/fe725a3d4d69503f3fde03b2ebaf8cab/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-557/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/7ac8af513e30.jpg" alt="Pine Display Cabinet with Glass Doors" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine Display Cabinet with Glass Doors</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 6h 41m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/006623a8e94f60350695358e445870ae/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-1839/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/c53f18331921.jpg" alt="Royal Gardens Highgrove Pine Box" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Royal Gardens Highgrove Pine Box</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="bid">Bid £9</span><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 9h 6m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/b8ce017084ae7ca7cc28c77ac23dfd98/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-1917/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/d86ed0a76b28.jpg" alt="Pine Desk with Drawers" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine Desk with Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="timeleft">⏱ 9h 32m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/69d1a8280f72f9cb8a938390541a1ebb/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-1928/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/c24d8a395158.jpg" alt="Pine Chest of Drawers" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine Chest of Drawers</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Shepton Mallet, Somerset · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £20 
+																					- 
+																					£40</span><span class="timeleft">⏱ 9h 35m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/77275ec4bafba016f4bf27d7ef57e3b7/0af8d24542e81eb9357e7ef448a6646f/antiques-and-general-auction-including-jewellery-gold-lot-442/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/3add52d1b581.jpg" alt="A vintage oak ash tray/plant stand, 31" high plus a rustic p..." loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">A vintage oak ash tray/plant stand, 31" high plus a rustic p...</p>
+        <p class="house-line"><span class="house" data-tip="📍 NR34 7TD · Beccles, Suffolk · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=NR34+7TD','_blank'); ">Beccles Auctions <span class="pc">NR34 7TD</span></span></p>
+        <div class="meta"><span class="estimate">Est £20 
+																					- 
+																					£30</span><span class="timeleft">⏱ 9h 12m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/6c7ad1aee48adad2e295bc8eae6dc798/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-653/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/60f805afa138.jpg" alt="Star lot : A lovely Late Victorian stained pine pedestal occ..." loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Star lot : A lovely Late Victorian stained pine pedestal occ...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="bid">Bid €40</span><span class="estimate">Est €120 
+																					- 
+																					€180</span><span class="timeleft">⏱ 8h 15m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/bea3368e3a2d24fa872c55d1f90baa1d/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-669/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/e4bfdb2e2e63.jpg" alt="Super Star Lot : A super pair of Important Anonima design La..." loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Super Star Lot : A super pair of Important Anonima design La...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="estimate">Est €1,200 
+																					- 
+																					€1,800</span><span class="timeleft">⏱ 8h 19m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/07e81f2981441efc558b37e5b9df6017/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-740/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/8bbd654469fb.jpg" alt="Star Lot : A vintage solid pine bureau bookcase with upper g..." loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Star Lot : A vintage solid pine bureau bookcase with upper g...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="estimate">Est €200 
+																					- 
+																					€400</span><span class="timeleft">⏱ 8h 36m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/b206408dcb03e80dc8d2790a6c0e0c44/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-1109/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/bea0e212df8a.jpg" alt="Late Victorian pine dressing table swing mirror, the rectang..." loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Late Victorian pine dressing table swing mirror, the rectang...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 10h 9m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/3cda93b7636ea6db53ccb45528e79b7b/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-1119/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/4ce02c8165cf.jpg" alt="Rustic timber insect hotel of house form, fitted with drille..." loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Rustic timber insect hotel of house form, fitted with drille...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 10h 11m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/e4097305830a91f2456687a3d4247316/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-1151/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/4af1c24d08a9.jpg" alt="Wall-mounted pine spice cupboard, the upper section with sha..." loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Wall-mounted pine spice cupboard, the upper section with sha...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 10h 19m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/cd06cc127608e883588ce285c98b3fa2/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-1464/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/2a2c2e9adef1.jpg" alt="Pine longcase clock with arched hood, painted dial with Roma..." loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine longcase clock with arched hood, painted dial with Roma...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="estimate">Est €150 
+																					- 
+																					€300</span><span class="timeleft">⏱ 11h 24m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/c702b1393dd65b2669b872b7a69193d4/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-1509/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/24a8c1bb9cd6.jpg" alt="Painted pine blanket chest with hinged lid and iron strap hi..." loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Painted pine blanket chest with hinged lid and iron strap hi...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="estimate">Est €80 
+																					- 
+																					€120</span><span class="timeleft">⏱ 11h 31m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/b7507d4fb68e07400d57d7d7cb902066/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-1573/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/87423043357f.jpg" alt="A pair of wall mirrors, comprising an octagonal bevelled gla..." loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">A pair of wall mirrors, comprising an octagonal bevelled gla...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 11h 39m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/07e49711b89f20c3ebc7c1a512d60740/0af8d24542e81eb9357e7ef448a6646f/victorian-general-auction-starts-1st-may-2026-estate-lot-189/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/6ebb30315449.jpg" alt="Antique Hand Mirrors One Ebony With Bevelled Glass One Paint..." loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Antique Hand Mirrors One Ebony With Bevelled Glass One Paint...</p>
+        <p class="house-line"><span class="house" data-tip="📍 ST16 3HR · Stafford · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=ST16+3HR','_blank'); ">Stafford Auctions <span class="pc">ST16 3HR</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est No</span><span class="timeleft">⏱ 8h 6m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/ef63596d60ec1a99c47ddcef1fadae33/0af8d24542e81eb9357e7ef448a6646f/victorian-general-auction-starts-1st-may-2026-estate-lot-276/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/6f103944b8c3.jpg" alt="Antique Pine Chest Box With Iron Lock and Iron Side Handles...." loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Antique Pine Chest Box With Iron Lock and Iron Side Handles....</p>
+        <p class="house-line"><span class="house" data-tip="📍 ST16 3HR · Stafford · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=ST16+3HR','_blank'); ">Stafford Auctions <span class="pc">ST16 3HR</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est No</span><span class="timeleft">⏱ 8h 49m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/e5b2f12d3ba5e52778bee2796788f46f/0af8d24542e81eb9357e7ef448a6646f/victorian-general-auction-starts-1st-may-2026-estate-lot-319/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/d2c1d3b4bc13.jpg" alt="Vintage Pine Framed Oil on Canvas Scenic Picture Signed Bill..." loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Vintage Pine Framed Oil on Canvas Scenic Picture Signed Bill...</p>
+        <p class="house-line"><span class="house" data-tip="📍 ST16 3HR · Stafford · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=ST16+3HR','_blank'); ">Stafford Auctions <span class="pc">ST16 3HR</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 9h 11m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/69ad04e9f62ea799e1b0a461de99a341/0af8d24542e81eb9357e7ef448a6646f/closed-bank-holiday-monday-art-jewellery-books-anti-lot-25/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/277d55975974.jpg" alt="Pine fire surround" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine fire surround</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK17 0EF · Milton Keynes · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK17+0EF','_blank'); ">Auction Keynes <span class="pc">MK17 0EF</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 6h 44m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/b3281b60b22327665a22972dc6f22d45/0af8d24542e81eb9357e7ef448a6646f/closed-bank-holiday-monday-art-jewellery-books-anti-lot-147/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/845747a3425b.jpg" alt="Pine bookcase" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine bookcase</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK17 0EF · Milton Keynes · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK17+0EF','_blank'); ">Auction Keynes <span class="pc">MK17 0EF</span></span></p>
+        <div class="meta"><span class="bid">Bid £5</span><span class="estimate">Est No</span><span class="timeleft">⏱ 7h 45m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/a67f3dafa417e83b6cfce6f2b2e686de/0af8d24542e81eb9357e7ef448a6646f/closed-bank-holiday-monday-art-jewellery-books-anti-lot-284/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/c8ee46d06a3d.jpg" alt="Pine dresser" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Pine dresser</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK17 0EF · Milton Keynes · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK17+0EF','_blank'); ">Auction Keynes <span class="pc">MK17 0EF</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 8h 53m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5a0d5fac888e2d8cced8ffc521152fc9/0af8d24542e81eb9357e7ef448a6646f/closed-bank-holiday-monday-art-jewellery-books-anti-lot-337/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/90e8b221c6bd.jpg" alt="Pine top cupboard" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">Pine top cupboard</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK17 0EF · Milton Keynes · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK17+0EF','_blank'); ">Auction Keynes <span class="pc">MK17 0EF</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 9h 20m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/b1eaa08a4742a3b89697a5aa23680bda/0af8d24542e81eb9357e7ef448a6646f/antiques-tools-industrial-decorative-interiors-auct-lot-82/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/e2d39fc0a04e.jpg" alt="large pine rocking chair" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">large pine rocking chair</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK18 6AH · Tingewick, Buckingham · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK18+6AH','_blank'); ">PSP Auctions <span class="pc">MK18 6AH</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 7h 50m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/9f09432b544dd2cf132c2d13dc52f85e/0af8d24542e81eb9357e7ef448a6646f/antiques-tools-industrial-decorative-interiors-auct-lot-87/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/5aa363171484.jpg" alt="pine towel stand" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">pine towel stand</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK18 6AH · Tingewick, Buckingham · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK18+6AH','_blank'); ">PSP Auctions <span class="pc">MK18 6AH</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 7h 51m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/b0ac79afd60861a86e176ec184f11c9f/0af8d24542e81eb9357e7ef448a6646f/antiques-tools-industrial-decorative-interiors-auct-lot-731/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/da7444640e40.jpg" alt="kitchen tble pine 152 cm long x 90 cm wide" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">kitchen tble pine 152 cm long x 90 cm wide</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK18 6AH · Tingewick, Buckingham · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK18+6AH','_blank'); ">PSP Auctions <span class="pc">MK18 6AH</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 8h 24m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/33a197e48e8e16c2a481aa7fbf249921/0af8d24542e81eb9357e7ef448a6646f/antiques-tools-industrial-decorative-interiors-auct-lot-839/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/21bac9450f39.jpg" alt="pine corner table" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">pine corner table</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK18 6AH · Tingewick, Buckingham · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK18+6AH','_blank'); ">PSP Auctions <span class="pc">MK18 6AH</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 8h 51m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/d8e39e569541bebaeb9ae42edd39b2cd/0af8d24542e81eb9357e7ef448a6646f/antiques-tools-industrial-decorative-interiors-auct-lot-855/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/f4d0f19f5f7f.jpg" alt="pine framed mirror" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">pine framed mirror</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK18 6AH · Tingewick, Buckingham · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK18+6AH','_blank'); ">PSP Auctions <span class="pc">MK18 6AH</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 8h 55m</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/a23871c75ed11ef3de943694ccd9f8fc/0af8d24542e81eb9357e7ef448a6646f/antiques-tools-industrial-decorative-interiors-auct-lot-868/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/d5ec6f78e4bf.jpg" alt="pine framed mirror" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-body">
+        <p class="title">pine framed mirror</p>
+        <p class="house-line"><span class="house" data-tip="📍 MK18 6AH · Tingewick, Buckingham · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=MK18+6AH','_blank'); ">PSP Auctions <span class="pc">MK18 6AH</span></span></p>
+        <div class="meta"><span class="estimate">Est No</span><span class="timeleft">⏱ 8h 58m</span></div>
+      </div>
+    </a></div>
+    </section>
+
+  <footer>
+    Pinefinders Old Pine Furniture Warehouse · search terms: pine<br>
+    <a href="https://pinefinders.github.io/auction-finds">pinefinders.github.io/auction-finds</a>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const cur = html.getAttribute('data-theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('pf-theme', next);
+      updateThemeBtn();
+    }
+    function updateThemeBtn() {
+      const btn = document.getElementById('themeBtn');
+      const isDark = (document.documentElement.getAttribute('data-theme') === 'dark') ||
+        (!document.documentElement.getAttribute('data-theme') &&
+         window.matchMedia('(prefers-color-scheme: dark)').matches);
+      btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+    }
+    const saved = localStorage.getItem('pf-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    updateThemeBtn();
+
+    let newOnly = false;
+    function filterNew() {
+      newOnly = !newOnly;
+      document.querySelectorAll('.card').forEach(c => {
+        const isNew = c.querySelector('.new-badge');
+        c.style.display = (newOnly && !isNew) ? 'none' : '';
+      });
+    }
+  </script>
+</body>
+</html>
