@@ -310,6 +310,28 @@ def house_meta(house, postcodes):
 
 
 # --- HTML rendering -------------------------------------------------------
+def _today_date_str(d=None):
+    """Return EasyLive's date format for `d` (default today), e.g.
+    'Sun 24th May 2026'. Used to match against `sale_date` / `sale_dates_raw`.
+    """
+    from datetime import date as _date
+    d = d or _date.today()
+    DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d.weekday()]
+    def _suffix(n):
+        if 10 <= n % 100 <= 20: return "th"
+        return {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{DOW} {d.day}{_suffix(d.day)} {d.strftime('%b')} {d.year}"
+
+
+def _is_today(lot, today_str):
+    """True if the lot's sale_date or sale_dates_raw mentions today.
+    Matches both 'Ends Sun 24th May 2026 ...' (timed) and multi-day live
+    bands like 'Sun 24th May 2026 9am BST (Lots 1 to 765) Mon 25th ...'.
+    """
+    blob = (lot.get("sale_date") or "") + " || " + (lot.get("sale_dates_raw") or "")
+    return today_str in blob
+
+
 def _card_html(lot, is_new, postcodes):
     img_src = f"images/{lot['img_file']}" if lot.get("img_file") else ""
     img_tag = (
@@ -382,6 +404,14 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
     total     = len(local_lots) + len(wide_lots)
     new_total = sum(1 for l in local_lots + wide_lots if l["id"] not in seen)
 
+    # Split into "selling today" vs "later" so the urgent stuff floats up.
+    today_str = _today_date_str()
+    local_today = [l for l in local_lots if _is_today(l, today_str)]
+    local_later = [l for l in local_lots if not _is_today(l, today_str)]
+    wide_today  = [l for l in wide_lots  if _is_today(l, today_str)]
+    wide_later  = [l for l in wide_lots  if not _is_today(l, today_str)]
+    today_total = len(local_today) + len(wide_today)
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -441,11 +471,12 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
     header {{
       background: var(--panel);
       border-bottom: 1px solid var(--accent-soft);
-      padding: 20px 24px;
+      padding: 14px 24px 12px;
       position: sticky; top: 0; z-index: 10;
       backdrop-filter: blur(8px);
-      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+      display: flex; align-items: center; gap: 16px 20px; flex-wrap: wrap;
     }}
+    header nav.jump {{ flex-basis: 100%; margin: 0; padding: 0; }}
     .brand {{ display: flex; align-items: baseline; gap: 12px; }}
     .brand h1 {{ font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }}
     .brand .logo {{ font-size: 1.5rem; }}
@@ -461,13 +492,13 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
 
     nav.jump {{
       max-width: 1500px; margin: 24px auto 0; padding: 0 24px;
-      display: flex; gap: 10px; flex-wrap: wrap;
+      display: flex; gap: 8px; flex-wrap: wrap;
     }}
     nav.jump a {{
-      background: var(--panel); color: var(--ink);
+      background: var(--bg); color: var(--ink);
       border: 1px solid var(--accent-soft);
-      padding: 8px 14px; border-radius: 999px;
-      text-decoration: none; font-size: 0.85rem; font-weight: 500;
+      padding: 6px 12px; border-radius: 999px;
+      text-decoration: none; font-size: 0.82rem; font-weight: 500;
       transition: all 0.15s;
     }}
     nav.jump a:hover {{ border-color: var(--accent); color: var(--accent); }}
@@ -484,6 +515,37 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
     }}
     @media (min-width: 1548px) {{
       section.local-section {{ margin: 36px auto 0; }}
+    }}
+    section.today-section {{
+      background: linear-gradient(180deg, rgba(217, 83, 30, 0.08), rgba(217, 83, 30, 0.02));
+      border-left: 4px solid #d9531e;
+      padding: 28px 24px 32px;
+      border-radius: var(--radius);
+      max-width: calc(1500px - 0px);
+      margin: 36px 24px 0;
+    }}
+    @media (min-width: 1548px) {{
+      section.today-section {{ margin: 36px auto 0; }}
+    }}
+    section.today-section h2 {{ color: #d9531e; }}
+    :root[data-theme="dark"] section.today-section {{
+      background: linear-gradient(180deg, rgba(255, 140, 80, 0.10), rgba(255, 140, 80, 0.02));
+      border-left-color: #ff8c50;
+    }}
+    :root[data-theme="dark"] section.today-section h2 {{ color: #ff8c50; }}
+    @media (prefers-color-scheme: dark) {{
+      :root:not([data-theme="light"]) section.today-section {{
+        background: linear-gradient(180deg, rgba(255, 140, 80, 0.10), rgba(255, 140, 80, 0.02));
+        border-left-color: #ff8c50;
+      }}
+      :root:not([data-theme="light"]) section.today-section h2 {{ color: #ff8c50; }}
+    }}
+    nav.jump a.today-pill {{
+      background: #d9531e; color: #fff; border-color: #d9531e;
+      font-weight: 600;
+    }}
+    nav.jump a.today-pill:hover {{
+      background: #b8421a; color: #fff;
     }}
     section h2 {{
       font-size: 1.15rem; font-weight: 800;
@@ -587,16 +649,18 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
 <body>
   <header>
     <div class="brand"><span class="logo">🩵</span><h1>Pinefinders Auction Finds</h1></div>
-    <span class="meta"><strong>{total} lots</strong> · {new_total} new since yesterday · Updated {now}</span>
+    <span class="meta"><strong>{total} lots</strong> · {today_total} today · {new_total} new since yesterday · Updated {now}</span>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    <nav class="jump">
+      <a href="#local">📍 Local · {len(local_lots)}</a>
+      {f'<a class="today-pill" href="#today">🔥 UK Today · {len(wide_today)}</a>' if wide_today else ''}
+      <a href="#uk-wide">🇬🇧 UK Later · {len(wide_later)}</a>
+      {f'<a class="new-pill" href="#" onclick="filterNew(); return false;">✨ {new_total} new</a>' if new_total else ''}
+    </nav>
   </header>
-  <nav class="jump">
-    <a href="#local">📍 Local · {len(local_lots)}</a>
-    <a href="#uk-wide">🇬🇧 UK-Wide · {len(wide_lots)}</a>
-    {f'<a class="new-pill" href="#" onclick="filterNew(); return false;">✨ {new_total} new</a>' if new_total else ''}
-  </nav>
   {_section_html("📍 Local auctions", local_lots, "local", seen, postcodes, "local-section")}
-  {_section_html("🇬🇧 UK-Wide", wide_lots, "uk-wide", seen, postcodes, "")}
+  {_section_html(f"🔥 UK-Wide · selling today ({today_str})", wide_today, "today", seen, postcodes, "today-section") if wide_today else ''}
+  {_section_html("🇬🇧 UK-Wide · later", wide_later, "uk-wide", seen, postcodes, "")}
   <footer>
     Pinefinders Old Pine Furniture Warehouse · search terms: {terms_str}<br>
     <a href="https://pinefinders.github.io/auction-finds">pinefinders.github.io/auction-finds</a>

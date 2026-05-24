@@ -57,11 +57,12 @@
     header {
       background: var(--panel);
       border-bottom: 1px solid var(--accent-soft);
-      padding: 20px 24px;
+      padding: 14px 24px 12px;
       position: sticky; top: 0; z-index: 10;
       backdrop-filter: blur(8px);
-      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+      display: flex; align-items: center; gap: 16px 20px; flex-wrap: wrap;
     }
+    header nav.jump { flex-basis: 100%; margin: 0; padding: 0; }
     .brand { display: flex; align-items: baseline; gap: 12px; }
     .brand h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }
     .brand .logo { font-size: 1.5rem; }
@@ -77,13 +78,13 @@
 
     nav.jump {
       max-width: 1500px; margin: 24px auto 0; padding: 0 24px;
-      display: flex; gap: 10px; flex-wrap: wrap;
+      display: flex; gap: 8px; flex-wrap: wrap;
     }
     nav.jump a {
-      background: var(--panel); color: var(--ink);
+      background: var(--bg); color: var(--ink);
       border: 1px solid var(--accent-soft);
-      padding: 8px 14px; border-radius: 999px;
-      text-decoration: none; font-size: 0.85rem; font-weight: 500;
+      padding: 6px 12px; border-radius: 999px;
+      text-decoration: none; font-size: 0.82rem; font-weight: 500;
       transition: all 0.15s;
     }
     nav.jump a:hover { border-color: var(--accent); color: var(--accent); }
@@ -100,6 +101,37 @@
     }
     @media (min-width: 1548px) {
       section.local-section { margin: 36px auto 0; }
+    }
+    section.today-section {
+      background: linear-gradient(180deg, rgba(217, 83, 30, 0.08), rgba(217, 83, 30, 0.02));
+      border-left: 4px solid #d9531e;
+      padding: 28px 24px 32px;
+      border-radius: var(--radius);
+      max-width: calc(1500px - 0px);
+      margin: 36px 24px 0;
+    }
+    @media (min-width: 1548px) {
+      section.today-section { margin: 36px auto 0; }
+    }
+    section.today-section h2 { color: #d9531e; }
+    :root[data-theme="dark"] section.today-section {
+      background: linear-gradient(180deg, rgba(255, 140, 80, 0.10), rgba(255, 140, 80, 0.02));
+      border-left-color: #ff8c50;
+    }
+    :root[data-theme="dark"] section.today-section h2 { color: #ff8c50; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) section.today-section {
+        background: linear-gradient(180deg, rgba(255, 140, 80, 0.10), rgba(255, 140, 80, 0.02));
+        border-left-color: #ff8c50;
+      }
+      :root:not([data-theme="light"]) section.today-section h2 { color: #ff8c50; }
+    }
+    nav.jump a.today-pill {
+      background: #d9531e; color: #fff; border-color: #d9531e;
+      font-weight: 600;
+    }
+    nav.jump a.today-pill:hover {
+      background: #b8421a; color: #fff;
     }
     section h2 {
       font-size: 1.15rem; font-weight: 800;
@@ -203,14 +235,15 @@
 <body>
   <header>
     <div class="brand"><span class="logo">🩵</span><h1>Pinefinders Auction Finds</h1></div>
-    <span class="meta"><strong>876 lots</strong> · 0 new since yesterday · Updated Sunday 24 May 2026, 10:38</span>
+    <span class="meta"><strong>876 lots</strong> · 115 today · 0 new since yesterday · Updated Sunday 24 May 2026, 10:53</span>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    <nav class="jump">
+      <a href="#local">📍 Local · 28</a>
+      <a class="today-pill" href="#today">🔥 UK Today · 92</a>
+      <a href="#uk-wide">🇬🇧 UK Later · 756</a>
+      
+    </nav>
   </header>
-  <nav class="jump">
-    <a href="#local">📍 Local · 28</a>
-    <a href="#uk-wide">🇬🇧 UK-Wide · 848</a>
-    
-  </nav>
   
     <section id="local" class="local-section">
       <h2>📍 Local auctions <span class="count">28 lots</span></h2>
@@ -506,8 +539,8 @@
     </a></div>
     </section>
   
-    <section id="uk-wide" class="">
-      <h2>🇬🇧 UK-Wide <span class="count">848 lots</span></h2>
+    <section id="today" class="today-section">
+      <h2>🔥 UK-Wide · selling today (Sun 24th May 2026) <span class="count">92 lots</span></h2>
       <div class="masonry">
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/580966dfb8a04d957a50dd13374ee60a/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-410/" target="_blank" rel="noopener">
       <div class="card-img"><img src="images/767146555618.jpg" alt="Pine four drawer Chest of Drawers" loading="lazy"></div>
@@ -1428,6 +1461,61 @@
       </div>
     </a>
 
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/60f77d84f491f6ae731e0563a4eef36c/0af8d24542e81eb9357e7ef448a6646f/antiques-gold-fine-art-collectors-auction-lot-502/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/a80c3b3485ce.jpg" alt="A Victorian pine blanket box" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">A Victorian pine blanket box</p>
+        <p class="house-line"><span class="house" data-tip="📍 LN6 3UA · Vincent Court, Turnstone Road, Teal Park, Lincoln · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=LN6+3UA','_blank'); ">Unique Auctions House <span class="pc">LN6 3UA</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="saledate" data-tip="📅 Sun 24th May 2026 9am BST (Lots 0 to 765) Mon 25th May 2026 10am BST (Lots 1001 to 1320)">📅 Sun 24th May 2026 9am BST</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/2fc5773e70d425a1086e2c92e6179517/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-1984/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/ea74711d99a5.jpg" alt="Decorative Monkey Ornament with Pineapple" loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Decorative Monkey Ornament with Pineapple</p>
+        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
+        <div class="meta"><span class="estimate">Est £10 
+																					- 
+																					£20</span><span class="saledate">📅 Ends Sun 24th May 2026 from 2pm BST</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/3c7aa89c5a81e64ce0f9d135ab3afaea/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-418/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/0206e7d4cf18.jpg" alt="Three garden ornaments comprising a galvanised metal tub of ..." loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Three garden ornaments comprising a galvanised metal tub of ...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="bid">Bid €14</span><span class="estimate">Est No</span><span class="saledate">📅 Ends Sun 24th May 2026 from 3pm BST</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/6161641d49f5c25fe1519a1fc7ac441b/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-1216/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/8794be4540bb.jpg" alt="Six teak serving bowls carved as pineapples, each with scall..." loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">Six teak serving bowls carved as pineapples, each with scall...</p>
+        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
+        <div class="meta"><span class="bid">Bid €14</span><span class="estimate">Est No</span><span class="saledate">📅 Ends Sun 24th May 2026 from 3pm BST</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/854bf67483953152979a588c983e4bed/0af8d24542e81eb9357e7ef448a6646f/classic-contemporary-garden-statuary-timed-online-au-lot-400/" target="_blank" rel="noopener">
+      <div class="card-img"><img src="images/cddf223a71e1.jpg" alt="A PAIR OF COMPOSITION FINIALS each modelled as a pineapple r..." loading="lazy"></div>
+      <div class="card-body">
+        <p class="title">A PAIR OF COMPOSITION FINIALS each modelled as a pineapple r...</p>
+        <p class="house-line"><span class="house" data-tip="🌍 Ireland">Mullen's Auctioneers <span class="pc pc-intl">Ireland</span></span></p>
+        <div class="meta"><span class="estimate">Est €60 
+																					- 
+																					€80</span><span class="saledate">📅 Ends Sun 24th May 2026 from 6pm BST</span></div>
+      </div>
+    </a></div>
+    </section>
+  
+    <section id="uk-wide" class="">
+      <h2>🇬🇧 UK-Wide · later <span class="count">756 lots</span></h2>
+      <div class="masonry">
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/108f8b15530c276accaa154d69bbd6e4/0af8d24542e81eb9357e7ef448a6646f/may-antique-and-collectible-sale-inc-american-white-h-lot-28/" target="_blank" rel="noopener">
       <div class="card-img"><img src="images/666ebf2326c7.jpg" alt="Large Dodecagon Pine Frame Wall Clock - C. 70cm W" loading="lazy"></div>
       <div class="card-body">
@@ -1667,17 +1755,6 @@
         <div class="meta"><span class="estimate">Est €30 
 																					- 
 																					€60</span><span class="saledate">📅 Ends Mon 25th May 2026 from 6pm BST</span></div>
-      </div>
-    </a>
-
-    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/60f77d84f491f6ae731e0563a4eef36c/0af8d24542e81eb9357e7ef448a6646f/antiques-gold-fine-art-collectors-auction-lot-502/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/a80c3b3485ce.jpg" alt="A Victorian pine blanket box" loading="lazy"></div>
-      <div class="card-body">
-        <p class="title">A Victorian pine blanket box</p>
-        <p class="house-line"><span class="house" data-tip="📍 LN6 3UA · Vincent Court, Turnstone Road, Teal Park, Lincoln · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=LN6+3UA','_blank'); ">Unique Auctions House <span class="pc">LN6 3UA</span></span></p>
-        <div class="meta"><span class="estimate">Est £10 
-																					- 
-																					£20</span><span class="saledate" data-tip="📅 Sun 24th May 2026 9am BST (Lots 0 to 765) Mon 25th May 2026 10am BST (Lots 1001 to 1320)">📅 Sun 24th May 2026 9am BST</span></div>
       </div>
     </a>
 
@@ -8902,46 +8979,6 @@
         <div class="meta"><span class="estimate">Est £200 
 																					- 
 																					£300</span><span class="saledate" data-tip="📅 Tue 23rd Jun 2026 10am BST (Lots 1 to 549)">📅 Tue 23rd Jun 2026 10am BST</span></div>
-      </div>
-    </a>
-
-    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/2fc5773e70d425a1086e2c92e6179517/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-1984/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/ea74711d99a5.jpg" alt="Decorative Monkey Ornament with Pineapple" loading="lazy"></div>
-      <div class="card-body">
-        <p class="title">Decorative Monkey Ornament with Pineapple</p>
-        <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
-        <div class="meta"><span class="estimate">Est £10 
-																					- 
-																					£20</span><span class="saledate">📅 Ends Sun 24th May 2026 from 2pm BST</span></div>
-      </div>
-    </a>
-
-    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/3c7aa89c5a81e64ce0f9d135ab3afaea/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-418/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/0206e7d4cf18.jpg" alt="Three garden ornaments comprising a galvanised metal tub of ..." loading="lazy"></div>
-      <div class="card-body">
-        <p class="title">Three garden ornaments comprising a galvanised metal tub of ...</p>
-        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
-        <div class="meta"><span class="bid">Bid €14</span><span class="estimate">Est No</span><span class="saledate">📅 Ends Sun 24th May 2026 from 3pm BST</span></div>
-      </div>
-    </a>
-
-    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/6161641d49f5c25fe1519a1fc7ac441b/0af8d24542e81eb9357e7ef448a6646f/amazing-auction-this-week-starting-thursday-an-amazing-lot-1216/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/8794be4540bb.jpg" alt="Six teak serving bowls carved as pineapples, each with scall..." loading="lazy"></div>
-      <div class="card-body">
-        <p class="title">Six teak serving bowls carved as pineapples, each with scall...</p>
-        <p class="house-line"><span class="house" data-tip="📍 D12 V2YX · Walkinstown, Dublin 12 · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=D12+V2YX','_blank'); ">South Dublin Auction <span class="pc">D12 V2YX</span></span></p>
-        <div class="meta"><span class="bid">Bid €14</span><span class="estimate">Est No</span><span class="saledate">📅 Ends Sun 24th May 2026 from 3pm BST</span></div>
-      </div>
-    </a>
-
-    <a class="card" href="https://www.easyliveauction.com/catalogue/lot/854bf67483953152979a588c983e4bed/0af8d24542e81eb9357e7ef448a6646f/classic-contemporary-garden-statuary-timed-online-au-lot-400/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/cddf223a71e1.jpg" alt="A PAIR OF COMPOSITION FINIALS each modelled as a pineapple r..." loading="lazy"></div>
-      <div class="card-body">
-        <p class="title">A PAIR OF COMPOSITION FINIALS each modelled as a pineapple r...</p>
-        <p class="house-line"><span class="house" data-tip="🌍 Ireland">Mullen's Auctioneers <span class="pc pc-intl">Ireland</span></span></p>
-        <div class="meta"><span class="estimate">Est €60 
-																					- 
-																					€80</span><span class="saledate">📅 Ends Sun 24th May 2026 from 6pm BST</span></div>
       </div>
     </a>
 
