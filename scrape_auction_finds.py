@@ -96,12 +96,12 @@ def parse_card(card):
     url     = urljoin(EASYLIVE_BASE, href) if href else ""
     lot_id  = hashlib.md5(url.encode()).hexdigest()[:12] if url else hashlib.md5(img_url.encode()).hexdigest()[:12]
 
-    # Auction ID (shared across all lots in the same sale)
-    auction_id = card.get("data-id", "")
-    if not auction_id:
-        # Fallback: middle hash of the lot URL is the auction slug
-        m = re.search(r'/lot/[^/]+/([^/]+)/', url)
-        auction_id = m.group(1) if m else ""
+    # Auction ID (shared across all lots in the same sale). It lives on a
+    # child <a data-id="..."> inside the card, not on the .grid-lot div itself.
+    auction_id = ""
+    aid_el = card.find(attrs={"data-id": True})
+    if aid_el:
+        auction_id = aid_el.get("data-id", "")
 
     # Title — the <p> inside a.no-hover
     title_el = card.select_one("a.no-hover p")
