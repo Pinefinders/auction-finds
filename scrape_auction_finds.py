@@ -335,7 +335,7 @@ def _is_today(lot, today_str):
 def _card_html(lot, is_new, postcodes):
     img_src = f"images/{lot['img_file']}" if lot.get("img_file") else ""
     img_tag = (
-        f'<img src="{img_src}" alt="{lot["title"]}" loading="lazy">'
+        f'<img src="{img_src}" alt="{lot["title"]}" width="500" height="500" loading="lazy">'
         if img_src else '<div class="no-img">No image</div>'
     )
     bid      = f'<span class="bid">Bid {lot["bid"]}</span>'           if lot.get("bid")       else ""
