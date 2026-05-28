@@ -75,6 +75,47 @@
       font-size: 0.85rem; font-family: inherit;
     }
     .theme-toggle:hover { background: var(--accent); color: var(--panel); }
+    
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      max-width: 400px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 8px 36px 8px 12px;
+      border: 1px solid var(--accent-soft);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-box input:focus { border-color: var(--accent); }
+    .search-box input::placeholder { color: var(--muted); }
+    .search-box .clear-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      display: none;
+    }
+    .search-box.has-text .clear-btn { display: block; }
+    .search-results {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .search-results strong { color: var(--accent); }
 
     nav.jump {
       max-width: 1500px; margin: 24px auto 0; padding: 0 24px;
@@ -235,13 +276,18 @@
 <body>
   <header>
     <div class="brand"><span class="logo">🩵</span><h1>Pinefinders Auction Finds</h1></div>
-    <span class="meta"><strong>721 lots</strong> · 148 today · 99 new since yesterday · Updated Thursday 28 May 2026, 05:08</span>
+    <div class="search-box" id="searchBox">
+      <input type="text" id="searchInput" placeholder="🔍 Search items (e.g. bedside cupboard, chest of drawers...)" oninput="searchItems()">
+      <button class="clear-btn" onclick="clearSearch()" title="Clear search">✕</button>
+    </div>
+    <span class="search-results" id="searchResults"></span>
+    <span class="meta"><strong>721 lots</strong> · 148 today · 0 new since yesterday · Updated Thursday 28 May 2026, 07:51</span>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
     <nav class="jump">
       <a href="#local">📍 Local · 23</a>
       <a class="today-pill" href="#today">🔥 UK Today · 143</a>
       <a href="#uk-wide">🇬🇧 UK Later · 555</a>
-      <a class="new-pill" href="#" onclick="filterNew(); return false;">✨ 99 new</a>
+      
     </nav>
   </header>
   
@@ -467,7 +513,7 @@
     </section>
   
     <section id="today" class="today-section">
-      <h2>🔥 UK-Wide · selling today (Thu 28th May 2026) <span class="count">143 lots</span> <span class="new-count">2 new</span></h2>
+      <h2>🔥 UK-Wide · selling today (Thu 28th May 2026) <span class="count">143 lots</span></h2>
       <div class="masonry">
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5acd31d14595aabd459c12dc5e1432e2/0af8d24542e81eb9357e7ef448a6646f/online-only-timed-ephemera-artwork-books-comics-auc-lot-42/" target="_blank" rel="noopener">
       <div class="card-img"><img src="images/61b5598d86e2.jpg" alt="Seven film posters - Fern Gully The Last Rain Forest,  Babe,..." width="500" height="500" loading="lazy"></div>
@@ -1260,7 +1306,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/fd4c35354af4d92c7fbdcf70cbf9bc62/0af8d24542e81eb9357e7ef448a6646f/auction-to-include-antiques-gold-and-silver-jewellery-lot-147/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/4190ffed9a0c.jpg" alt="An assortment of mid-20th-century pine stools, each with a s..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/4190ffed9a0c.jpg" alt="An assortment of mid-20th-century pine stools, each with a s..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">An assortment of mid-20th-century pine stools, each with a s...</p>
         <p class="house-line"><span class="house" data-tip="📍 WR9 8DY · 16 Saint Andrews Street, Droitwich · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=WR9+8DY','_blank'); ">Droitwich Auctions Lt... <span class="pc">WR9 8DY</span></span></p>
@@ -1957,7 +2003,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/2af5be8057c209a2ca0edcdc182e29ec/0af8d24542e81eb9357e7ef448a6646f/bankrupt-and-new-stock-small-collectableswood-working-lot-450/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/950b3986d778.jpg" alt="Large Inflatable Pineapple Pool Toy" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/950b3986d778.jpg" alt="Large Inflatable Pineapple Pool Toy" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Large Inflatable Pineapple Pool Toy</p>
         <p class="house-line"><span class="house" data-tip="📍 TW12 3QD · Old Farm Stables, Oak Ave, Hampton · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=TW12+3QD','_blank'); ">Hanworth Auctions Ltd <span class="pc">TW12 3QD</span></span></p>
@@ -1978,7 +2024,7 @@
     </section>
   
     <section id="uk-wide" class="">
-      <h2>🇬🇧 UK-Wide · later <span class="count">555 lots</span> <span class="new-count">97 new</span></h2>
+      <h2>🇬🇧 UK-Wide · later <span class="count">555 lots</span></h2>
       <div class="masonry">
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/ef70ff4a7a93adb30073eb7669c8318c/0af8d24542e81eb9357e7ef448a6646f/timed-general-sale-including-commercial-catering-serve-lot-286/" target="_blank" rel="noopener">
       <div class="card-img"><img src="images/757c399da8db.jpg" alt="Pine Drop Leaf Table. L 1790 W66cm (74 extended)." width="500" height="500" loading="lazy"></div>
@@ -2036,7 +2082,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/1393eee5fab69f73748d5559ff687826/0af8d24542e81eb9357e7ef448a6646f/timed-general-sale-including-commercial-catering-serve-lot-495/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/c0c3df9ed6ee.jpg" alt="Pine table 120 x 66 cm" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/c0c3df9ed6ee.jpg" alt="Pine table 120 x 66 cm" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine table 120 x 66 cm</p>
         <p class="house-line"><span class="house" data-tip="📍 TQ9 5XL · Unit 2B Burke Road, Totnes · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=TQ9+5XL','_blank'); ">Western Salerooms Ltd <span class="pc">TQ9 5XL</span></span></p>
@@ -2056,7 +2102,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/879f445aeef4efc6870e3d534901652d/0af8d24542e81eb9357e7ef448a6646f/general-timed-sale-finishes-friday-lot-59/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/df145f6b2a16.jpg" alt="Pine and Cork Framed Wall Hanging Mirror 58x43cm" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/df145f6b2a16.jpg" alt="Pine and Cork Framed Wall Hanging Mirror 58x43cm" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine and Cork Framed Wall Hanging Mirror 58x43cm</p>
         <p class="house-line"><span class="house" data-tip="📍 PR6 0AA · Primrose Bank House, Friday Street, Chorley · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=PR6+0AA','_blank'); ">Chorley Auction House... <span class="pc">PR6 0AA</span></span></p>
@@ -2571,7 +2617,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/edbcc0825bcb5212d8c7496c38f439d8/0af8d24542e81eb9357e7ef448a6646f/antiques-collectables-sale-to-include-japanese-cerami-lot-95/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/594c5fd6e2ce.jpg" alt="American pine washboard with integral legs and rounded top r..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/594c5fd6e2ce.jpg" alt="American pine washboard with integral legs and rounded top r..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">American pine washboard with integral legs and rounded top r...</p>
         <p class="house-line"><span class="house" data-tip="📍 BT53 6NR · 22 Kilmoyle Road, Ballybogey, Antrim · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BT53+6NR','_blank'); ">North Coast Auctions <span class="pc">BT53 6NR</span></span></p>
@@ -2580,7 +2626,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/eb45b2413004f99e2f7e246b4d8308c9/0af8d24542e81eb9357e7ef448a6646f/antiques-collectables-sale-to-include-japanese-cerami-lot-150/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/2f29698e16c4.jpg" alt="Pine wall cupboard, probably 19th century, with moulded corn..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/2f29698e16c4.jpg" alt="Pine wall cupboard, probably 19th century, with moulded corn..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine wall cupboard, probably 19th century, with moulded corn...</p>
         <p class="house-line"><span class="house" data-tip="📍 BT53 6NR · 22 Kilmoyle Road, Ballybogey, Antrim · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BT53+6NR','_blank'); ">North Coast Auctions <span class="pc">BT53 6NR</span></span></p>
@@ -2589,7 +2635,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5ed589e687c5987561c79852f5957c41/0af8d24542e81eb9357e7ef448a6646f/antiques-collectables-sale-to-include-japanese-cerami-lot-412/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/f6a91a5e02e3.jpg" alt="Painted pine chest of drawers, of rectangular top above two ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/f6a91a5e02e3.jpg" alt="Painted pine chest of drawers, of rectangular top above two ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Painted pine chest of drawers, of rectangular top above two ...</p>
         <p class="house-line"><span class="house" data-tip="📍 BT53 6NR · 22 Kilmoyle Road, Ballybogey, Antrim · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BT53+6NR','_blank'); ">North Coast Auctions <span class="pc">BT53 6NR</span></span></p>
@@ -2598,7 +2644,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/701671eb9651f8c24e517bacec49548b/0af8d24542e81eb9357e7ef448a6646f/antiques-collectables-sale-to-include-japanese-cerami-lot-519/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/f2682dbeecbd.jpg" alt="Pine washstand, late 19th/early 20th century, with shaped ba..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/f2682dbeecbd.jpg" alt="Pine washstand, late 19th/early 20th century, with shaped ba..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine washstand, late 19th/early 20th century, with shaped ba...</p>
         <p class="house-line"><span class="house" data-tip="📍 BT53 6NR · 22 Kilmoyle Road, Ballybogey, Antrim · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BT53+6NR','_blank'); ">North Coast Auctions <span class="pc">BT53 6NR</span></span></p>
@@ -2652,7 +2698,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/f91c7eb2e1c491938d38c9f14eed9aca/0af8d24542e81eb9357e7ef448a6646f/antiques-and-general-auction-including-silver-books-f-lot-36/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/41caba49f937.jpg" alt="2 Over 3 Pine Effect Chest Of Drawers" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/41caba49f937.jpg" alt="2 Over 3 Pine Effect Chest Of Drawers" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">2 Over 3 Pine Effect Chest Of Drawers</p>
         <p class="house-line"><span class="house" data-tip="📍 ME7 4DH · 5-7 Livingstone Buildings, Gillingham, Kent · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=ME7+4DH','_blank'); ">Abbey Auction Rooms L... <span class="pc">ME7 4DH</span></span></p>
@@ -2663,7 +2709,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/aa03b280b5bfa6e9aade83b96156a383/0af8d24542e81eb9357e7ef448a6646f/antiques-and-general-auction-including-silver-books-f-lot-52/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/d9b5ce3c95cc.jpg" alt="Solid Pine Side Board Upcycled" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/d9b5ce3c95cc.jpg" alt="Solid Pine Side Board Upcycled" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Solid Pine Side Board Upcycled</p>
         <p class="house-line"><span class="house" data-tip="📍 ME7 4DH · 5-7 Livingstone Buildings, Gillingham, Kent · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=ME7+4DH','_blank'); ">Abbey Auction Rooms L... <span class="pc">ME7 4DH</span></span></p>
@@ -2674,7 +2720,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/7d346adf93cf4d74a3eb2e9485c45da7/0af8d24542e81eb9357e7ef448a6646f/antiques-and-general-auction-including-silver-books-f-lot-110/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/3f72e0ac9863.jpg" alt="Long Thin Pine Framed Mirror" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/3f72e0ac9863.jpg" alt="Long Thin Pine Framed Mirror" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Long Thin Pine Framed Mirror</p>
         <p class="house-line"><span class="house" data-tip="📍 ME7 4DH · 5-7 Livingstone Buildings, Gillingham, Kent · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=ME7+4DH','_blank'); ">Abbey Auction Rooms L... <span class="pc">ME7 4DH</span></span></p>
@@ -2685,7 +2731,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5ce02479d9e0687123130b9c87822dbe/0af8d24542e81eb9357e7ef448a6646f/antiques-and-general-auction-including-silver-books-f-lot-210/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/a183e628ef4e.jpg" alt="Pine Storage Box" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/a183e628ef4e.jpg" alt="Pine Storage Box" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Storage Box</p>
         <p class="house-line"><span class="house" data-tip="📍 ME7 4DH · 5-7 Livingstone Buildings, Gillingham, Kent · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=ME7+4DH','_blank'); ">Abbey Auction Rooms L... <span class="pc">ME7 4DH</span></span></p>
@@ -2696,7 +2742,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/3f9095bf2b0100e2fbe048fd207a2e12/0af8d24542e81eb9357e7ef448a6646f/antiques-general-lot-451/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/b75f4c7f4ef5.jpg" alt="Pine dining suite. To include an extending, pedestal dining ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/b75f4c7f4ef5.jpg" alt="Pine dining suite. To include an extending, pedestal dining ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine dining suite. To include an extending, pedestal dining ...</p>
         <p class="house-line"><span class="house" data-tip="📍 GL2 5HY · 7 Empire Way, Gloucester · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=GL2+5HY','_blank'); ">Heart of Gloucester A... <span class="pc">GL2 5HY</span></span></p>
@@ -2707,7 +2753,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/f2e379cbb8bc6a06bb93f8e19bfeab25/0af8d24542e81eb9357e7ef448a6646f/antiques-general-lot-453/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/cec80c6015ae.jpg" alt="Pine four poster bed frame - size double. Assembled dimensio..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/cec80c6015ae.jpg" alt="Pine four poster bed frame - size double. Assembled dimensio..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine four poster bed frame - size double. Assembled dimensio...</p>
         <p class="house-line"><span class="house" data-tip="📍 GL2 5HY · 7 Empire Way, Gloucester · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=GL2+5HY','_blank'); ">Heart of Gloucester A... <span class="pc">GL2 5HY</span></span></p>
@@ -2718,7 +2764,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/53ffcccce238a29c342fe0afb45ead72/0af8d24542e81eb9357e7ef448a6646f/antiques-general-lot-547/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/8d28aa2401ff.jpg" alt="Large pine Welsh dresser, featuring an upper open rack with ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/8d28aa2401ff.jpg" alt="Large pine Welsh dresser, featuring an upper open rack with ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Large pine Welsh dresser, featuring an upper open rack with ...</p>
         <p class="house-line"><span class="house" data-tip="📍 GL2 5HY · 7 Empire Way, Gloucester · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=GL2+5HY','_blank'); ">Heart of Gloucester A... <span class="pc">GL2 5HY</span></span></p>
@@ -2729,7 +2775,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/393d522ce85fc46af211bbc7808693dd/0af8d24542e81eb9357e7ef448a6646f/antiques-general-lot-957/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/b1ce14afae53.jpg" alt="Pine bedside Cabinet, with two drawers & castors. Dimensions..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/b1ce14afae53.jpg" alt="Pine bedside Cabinet, with two drawers & castors. Dimensions..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine bedside Cabinet, with two drawers & castors. Dimensions...</p>
         <p class="house-line"><span class="house" data-tip="📍 GL2 5HY · 7 Empire Way, Gloucester · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=GL2+5HY','_blank'); ">Heart of Gloucester A... <span class="pc">GL2 5HY</span></span></p>
@@ -2740,7 +2786,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/17f307cc226502152a8a62ad59920ee3/0af8d24542e81eb9357e7ef448a6646f/antiques-general-lot-1574/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/ca9db6165a83.jpg" alt="Three-piece pine bedroom suite. To include double bed frame ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/ca9db6165a83.jpg" alt="Three-piece pine bedroom suite. To include double bed frame ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Three-piece pine bedroom suite. To include double bed frame ...</p>
         <p class="house-line"><span class="house" data-tip="📍 GL2 5HY · 7 Empire Way, Gloucester · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=GL2+5HY','_blank'); ">Heart of Gloucester A... <span class="pc">GL2 5HY</span></span></p>
@@ -2751,7 +2797,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/22337e97ac923e1bc47a107ed9c68c26/0af8d24542e81eb9357e7ef448a6646f/antiques-general-lot-1586/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/72a08a0ba21b.jpg" alt="Pine dressing table swivel mirror. Dimensions(cm) H65, W60, ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/72a08a0ba21b.jpg" alt="Pine dressing table swivel mirror. Dimensions(cm) H65, W60, ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine dressing table swivel mirror. Dimensions(cm) H65, W60, ...</p>
         <p class="house-line"><span class="house" data-tip="📍 GL2 5HY · 7 Empire Way, Gloucester · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=GL2+5HY','_blank'); ">Heart of Gloucester A... <span class="pc">GL2 5HY</span></span></p>
@@ -2762,7 +2808,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/d36ed7d80ce8b5ba84f6cc0b2f4f2acc/0af8d24542e81eb9357e7ef448a6646f/antiques-general-lot-1630/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/312f6aa1feba.jpg" alt="Vintage pine framed mirror. Dimensions 91cm x 121cm." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/312f6aa1feba.jpg" alt="Vintage pine framed mirror. Dimensions 91cm x 121cm." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Vintage pine framed mirror. Dimensions 91cm x 121cm.</p>
         <p class="house-line"><span class="house" data-tip="📍 GL2 5HY · 7 Empire Way, Gloucester · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=GL2+5HY','_blank'); ">Heart of Gloucester A... <span class="pc">GL2 5HY</span></span></p>
@@ -2773,7 +2819,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/ff23c4c61efbd23b90b7f1d561a848c0/0af8d24542e81eb9357e7ef448a6646f/antiques-general-lot-1667/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/0253cdcc9f3f.jpg" alt="Vintage pine dresser. Dimensions(cm) H188, W138, D45." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/0253cdcc9f3f.jpg" alt="Vintage pine dresser. Dimensions(cm) H188, W138, D45." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Vintage pine dresser. Dimensions(cm) H188, W138, D45.</p>
         <p class="house-line"><span class="house" data-tip="📍 GL2 5HY · 7 Empire Way, Gloucester · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=GL2+5HY','_blank'); ">Heart of Gloucester A... <span class="pc">GL2 5HY</span></span></p>
@@ -2784,7 +2830,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/16dc3c6714cbb7890d658fa99a8beb8f/0af8d24542e81eb9357e7ef448a6646f/antiques-general-lot-2742/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/357743acd3cf.jpg" alt="A solid pine corner display cabinet. Dimensions(cm) H198, W7..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/357743acd3cf.jpg" alt="A solid pine corner display cabinet. Dimensions(cm) H198, W7..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A solid pine corner display cabinet. Dimensions(cm) H198, W7...</p>
         <p class="house-line"><span class="house" data-tip="📍 GL2 5HY · 7 Empire Way, Gloucester · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=GL2+5HY','_blank'); ">Heart of Gloucester A... <span class="pc">GL2 5HY</span></span></p>
@@ -4013,7 +4059,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/205b88da91805d1dd6071bda7169050a/0af8d24542e81eb9357e7ef448a6646f/lots-added-dailygeneral-auction-of-furniture-art-lot-433/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/e1b5c006bcad.jpg" alt="4 X PINE FRAMED DINNING CHAIRS" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/e1b5c006bcad.jpg" alt="4 X PINE FRAMED DINNING CHAIRS" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">4 X PINE FRAMED DINNING CHAIRS</p>
         <p class="house-line"><span class="house" data-tip="📍 PE7 2EU · Springwater Business Park, Whittlesey · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=PE7+2EU','_blank'); ">Glyn Jones Auctions <span class="pc">PE7 2EU</span></span></p>
@@ -4370,7 +4416,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/578f15ecf6b53697b6345a4cff294bda/0af8d24542e81eb9357e7ef448a6646f/antiques-and-collectables-lot-413/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/747725182e88.jpg" alt="A small painted pine wall hanging shelf -" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/747725182e88.jpg" alt="A small painted pine wall hanging shelf -" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A small painted pine wall hanging shelf -</p>
         <p class="house-line"><span class="house" data-tip="📍 BH24 1LA · The Close, Ringwood · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BH24+1LA','_blank'); ">Ringwood Auctions <span class="pc">BH24 1LA</span></span></p>
@@ -4381,7 +4427,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/c1d650ab01e22c348029ebb75729e8fa/0af8d24542e81eb9357e7ef448a6646f/antiques-and-collectables-lot-463/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/394cdcff98c1.jpg" alt="A pine kitchen dresser, with shelved top over a base with tw..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/394cdcff98c1.jpg" alt="A pine kitchen dresser, with shelved top over a base with tw..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A pine kitchen dresser, with shelved top over a base with tw...</p>
         <p class="house-line"><span class="house" data-tip="📍 BH24 1LA · The Close, Ringwood · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BH24+1LA','_blank'); ">Ringwood Auctions <span class="pc">BH24 1LA</span></span></p>
@@ -4392,7 +4438,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/0a571e513facb9df6aac3cdaac9d2bf0/0af8d24542e81eb9357e7ef448a6646f/antiques-and-collectables-lot-466/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/0cf515564beb.jpg" alt="A pine part bedroom suite, comprising chest of drawers, beds..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/0cf515564beb.jpg" alt="A pine part bedroom suite, comprising chest of drawers, beds..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A pine part bedroom suite, comprising chest of drawers, beds...</p>
         <p class="house-line"><span class="house" data-tip="📍 BH24 1LA · The Close, Ringwood · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BH24+1LA','_blank'); ">Ringwood Auctions <span class="pc">BH24 1LA</span></span></p>
@@ -4403,7 +4449,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/fa3a9eb1ada8a50ff4c37e6e6fba9d48/0af8d24542e81eb9357e7ef448a6646f/antiques-and-collectables-lot-468/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/ced3d0d71ff8.jpg" alt="A pine twin pedestal dining table, with 8 ladderback chairs ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/ced3d0d71ff8.jpg" alt="A pine twin pedestal dining table, with 8 ladderback chairs ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A pine twin pedestal dining table, with 8 ladderback chairs ...</p>
         <p class="house-line"><span class="house" data-tip="📍 BH24 1LA · The Close, Ringwood · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BH24+1LA','_blank'); ">Ringwood Auctions <span class="pc">BH24 1LA</span></span></p>
@@ -5063,7 +5109,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/e6e50eb3f04cddc90ac911378f4e6eee/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-409/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/f8ef6f429fc0.jpg" alt="Pine Chest of Drawers" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/f8ef6f429fc0.jpg" alt="Pine Chest of Drawers" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Chest of Drawers</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5074,7 +5120,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/e27ba6d7f7d87af7c5b1d29a3ec0e014/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-414/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/0b0b2ae5e96b.jpg" alt="Pine Chest of Drawers" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/0b0b2ae5e96b.jpg" alt="Pine Chest of Drawers" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Chest of Drawers</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5085,7 +5131,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/204dbbb41b8303f437c6e655732449d5/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-424/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/b76ef60dadbb.jpg" alt="Painted Pine Table with Drawers" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/b76ef60dadbb.jpg" alt="Painted Pine Table with Drawers" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Painted Pine Table with Drawers</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5096,7 +5142,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/49ae1ca341c1855b9017468c0ef2ea27/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-425/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/2dff59f62df1.jpg" alt="Pine Storage Box" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/2dff59f62df1.jpg" alt="Pine Storage Box" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Storage Box</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5107,7 +5153,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/8c49f15ba749db8164ef4c1caf679ff2/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-428/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/55118d930a12.jpg" alt="Pine Desk with Drawers" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/55118d930a12.jpg" alt="Pine Desk with Drawers" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Desk with Drawers</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5118,7 +5164,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/23dacdd5eae285ff4722e819bf603d3b/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-449/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/66b1f797800f.jpg" alt="Pine Magazine Rack" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/66b1f797800f.jpg" alt="Pine Magazine Rack" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Magazine Rack</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5129,7 +5175,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/d16a6cfb6d57b8a09fbdf06e56476fc6/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-464/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/96e4d5927504.jpg" alt="Pine Folding Wall Shelf" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/96e4d5927504.jpg" alt="Pine Folding Wall Shelf" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Folding Wall Shelf</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5140,7 +5186,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/b4040858396f288c6e207fccde46f427/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-475/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/ed3f2bf02357.jpg" alt="Lot of 3 Pine Nesting Tables" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/ed3f2bf02357.jpg" alt="Lot of 3 Pine Nesting Tables" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Lot of 3 Pine Nesting Tables</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5151,7 +5197,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/18beab01a954b9eb21d26093f3ae43dd/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-482/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/b3d307e98cbb.jpg" alt="Lot of 2 Goldin Pine Nesting Tables" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/b3d307e98cbb.jpg" alt="Lot of 2 Goldin Pine Nesting Tables" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Lot of 2 Goldin Pine Nesting Tables</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5162,7 +5208,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/0d7e3fe395e2caf6a76322dd805a0cf8/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-484/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/35c0594e4b61.jpg" alt="Victoria Dural Ltd Pine Cabinet" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/35c0594e4b61.jpg" alt="Victoria Dural Ltd Pine Cabinet" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Victoria Dural Ltd Pine Cabinet</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5173,7 +5219,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/b22a1f87e7ade0604caec5b21c1851f8/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-506/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/8f0bab9ed738.jpg" alt="Pine Cabinet with Hinged Door" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/8f0bab9ed738.jpg" alt="Pine Cabinet with Hinged Door" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Cabinet with Hinged Door</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5184,7 +5230,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/258119b7c295f37ed2afceaf2ae48161/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-553/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/461b3e829f08.jpg" alt="Pair of Pine Chairs" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/461b3e829f08.jpg" alt="Pair of Pine Chairs" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pair of Pine Chairs</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5195,7 +5241,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/916674dcea2cf68bad9d8aaaf2106ec0/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-564/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/181f03fe0b08.jpg" alt="Pine Chest" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/181f03fe0b08.jpg" alt="Pine Chest" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Chest</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5206,7 +5252,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/37f30a660f1af64881e626f675ee4a3e/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-570/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/3a39e9b310d8.jpg" alt="Pine Dressing Mirror with Drawers" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/3a39e9b310d8.jpg" alt="Pine Dressing Mirror with Drawers" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Dressing Mirror with Drawers</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5217,7 +5263,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/d7a156954aba1075ab2b623aecdadb50/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-573/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/f1b5e33d0786.jpg" alt="Pine Bedside Cabinet" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/f1b5e33d0786.jpg" alt="Pine Bedside Cabinet" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Bedside Cabinet</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5228,7 +5274,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/27d940bdb0fb45fefa4f44c06cbb4604/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-575/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/45758fca41d7.jpg" alt="Pine Hutch Dresser with Shelves and Drawers" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/45758fca41d7.jpg" alt="Pine Hutch Dresser with Shelves and Drawers" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Hutch Dresser with Shelves and Drawers</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5239,18 +5285,18 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/fb237f0711a3859ac6187c7760aeb3ae/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-1789/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/78017b5d565f.jpg" alt="Pine Chest of Drawers" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/78017b5d565f.jpg" alt="Pine Chest of Drawers" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Chest of Drawers</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
-        <div class="meta"><span class="estimate">Est £20 
+        <div class="meta"><span class="bid">Bid £3</span><span class="estimate">Est £20 
 																					- 
 																					£40</span><span class="saledate">📅 Ends Sun 31st May 2026 from 2pm BST</span></div>
       </div>
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/88cfa41cc8a911a49b9478731a21e374/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-1981/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/82b2d1f94964.jpg" alt="Pine Cabinet with Shelves" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/82b2d1f94964.jpg" alt="Pine Cabinet with Shelves" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Cabinet with Shelves</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5261,7 +5307,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/617e43ac79e69277a71c23137cccb511/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-1983/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/a5dd781730da.jpg" alt="Pine Folding Table and Chairs Set" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/a5dd781730da.jpg" alt="Pine Folding Table and Chairs Set" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine Folding Table and Chairs Set</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -5316,7 +5362,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/3469e431a2162f59f37dc153c236a95c/0af8d24542e81eb9357e7ef448a6646f/may-end-interiors-jewellery-collectors-sale-lot-169/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/d456c162faca.jpg" alt="Antique sixteen drawer rabbet jointed pine apothecary or hab..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/d456c162faca.jpg" alt="Antique sixteen drawer rabbet jointed pine apothecary or hab..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Antique sixteen drawer rabbet jointed pine apothecary or hab...</p>
         <p class="house-line"><span class="house" data-tip="📍 NN18 9EY · 4 Saxon Park, Saxon Way East, Corby · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=NN18+9EY','_blank'); ">Square & Compass Auct... <span class="pc">NN18 9EY</span></span></p>
@@ -5325,7 +5371,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/92fc76bc663ede2a0c1b92162bcfc04b/0af8d24542e81eb9357e7ef448a6646f/may-end-interiors-jewellery-collectors-sale-lot-179/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/b067692b32fc.jpg" alt="Nice pine small form shelving unit" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/b067692b32fc.jpg" alt="Nice pine small form shelving unit" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Nice pine small form shelving unit</p>
         <p class="house-line"><span class="house" data-tip="📍 NN18 9EY · 4 Saxon Park, Saxon Way East, Corby · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=NN18+9EY','_blank'); ">Square & Compass Auct... <span class="pc">NN18 9EY</span></span></p>
@@ -5334,7 +5380,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/63b0dc148fc357b8a3755e786dcad6fd/0af8d24542e81eb9357e7ef448a6646f/may-end-interiors-jewellery-collectors-sale-lot-182/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/816ef52b34e0.jpg" alt="Vintage Shabby Chic Pine Dressing Table - Dove Tail Joints a..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/816ef52b34e0.jpg" alt="Vintage Shabby Chic Pine Dressing Table - Dove Tail Joints a..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Vintage Shabby Chic Pine Dressing Table - Dove Tail Joints a...</p>
         <p class="house-line"><span class="house" data-tip="📍 NN18 9EY · 4 Saxon Park, Saxon Way East, Corby · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=NN18+9EY','_blank'); ">Square & Compass Auct... <span class="pc">NN18 9EY</span></span></p>
@@ -5343,7 +5389,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/83afe43d7868f8235a835bf46dd2d2d9/0af8d24542e81eb9357e7ef448a6646f/may-end-interiors-jewellery-collectors-sale-lot-199/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/5e73449bee76.jpg" alt="Solid Pine Six Drawer Chest with Black Ring handles" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/5e73449bee76.jpg" alt="Solid Pine Six Drawer Chest with Black Ring handles" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Solid Pine Six Drawer Chest with Black Ring handles</p>
         <p class="house-line"><span class="house" data-tip="📍 NN18 9EY · 4 Saxon Park, Saxon Way East, Corby · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=NN18+9EY','_blank'); ">Square & Compass Auct... <span class="pc">NN18 9EY</span></span></p>
@@ -5407,7 +5453,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/59812be36542df4833e1633df414f7fb/0af8d24542e81eb9357e7ef448a6646f/live-auction-of-antiques-collectables-etc-lot-44/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/f606b9bc0c71.jpg" alt="A vintage wooden folding step stool, constructed from solid ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/f606b9bc0c71.jpg" alt="A vintage wooden folding step stool, constructed from solid ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A vintage wooden folding step stool, constructed from solid ...</p>
         <p class="house-line"><span class="house" data-tip="📍 BB4 5HL · Prinny Mill Business Centre, Haslingden · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BB4+5HL','_blank'); ">Red Rose Auctions Ltd <span class="pc">BB4 5HL</span></span></p>
@@ -5626,7 +5672,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/4eaae2f22b7af70abfdc007f6214b0d7/0af8d24542e81eb9357e7ef448a6646f/antiques-collectables-live-online-only-sale-viewi-lot-54/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/793ae05b52e6.jpg" alt="A small Georgian pine wall hanging angle cabinet fitted two ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/793ae05b52e6.jpg" alt="A small Georgian pine wall hanging angle cabinet fitted two ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A small Georgian pine wall hanging angle cabinet fitted two ...</p>
         <p class="house-line"><span class="house" data-tip="📍 BH1 3JW · 11-14 Lansdowne House, Christchurch Road, Bournemouth · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BH1+3JW','_blank'); ">House & Son Auctionee... <span class="pc">BH1 3JW</span></span></p>
@@ -5635,7 +5681,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/ebab39825395037d2dc8ebaef1f18f62/0af8d24542e81eb9357e7ef448a6646f/antiques-collectables-live-online-only-sale-viewi-lot-254/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/e8242801b12c.jpg" alt="A stained pine gun case" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/e8242801b12c.jpg" alt="A stained pine gun case" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A stained pine gun case</p>
         <p class="house-line"><span class="house" data-tip="📍 BH1 3JW · 11-14 Lansdowne House, Christchurch Road, Bournemouth · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BH1+3JW','_blank'); ">House & Son Auctionee... <span class="pc">BH1 3JW</span></span></p>
@@ -5644,7 +5690,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/6f2d3e47a0088a6f4ed8842855d566f5/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-85/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/8f64874f51d6.jpg" alt="Sword stick contained in a pine knarled scabbard, circa earl..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/8f64874f51d6.jpg" alt="Sword stick contained in a pine knarled scabbard, circa earl..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Sword stick contained in a pine knarled scabbard, circa earl...</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5653,7 +5699,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/d736517f713b02da8719f9515e2dd608/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-107/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/2f897d91fee4.jpg" alt="Four dolls prams and a pine dolls cradle with contents." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/2f897d91fee4.jpg" alt="Four dolls prams and a pine dolls cradle with contents." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Four dolls prams and a pine dolls cradle with contents.</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5662,7 +5708,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/6d34ff44bfcb9b19e64dc9893f465cf7/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-146/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/25802527c2fc.jpg" alt=""The Davidson" vintage croquet set, with mallets and stumps,..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/25802527c2fc.jpg" alt=""The Davidson" vintage croquet set, with mallets and stumps,..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">"The Davidson" vintage croquet set, with mallets and stumps,...</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5671,7 +5717,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5a6213616ab2f9157390792683d87369/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-152/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/5fffb2cbabe2.jpg" alt="Group of vintage pine boxes and crates." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/5fffb2cbabe2.jpg" alt="Group of vintage pine boxes and crates." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Group of vintage pine boxes and crates.</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5680,7 +5726,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/bc44e6dd693dd1b9f7655a8031300574/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-281/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/567b92573dd4.jpg" alt="One shelve of dolls furniture, to include figures, pine dres..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/567b92573dd4.jpg" alt="One shelve of dolls furniture, to include figures, pine dres..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">One shelve of dolls furniture, to include figures, pine dres...</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5689,7 +5735,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/daaf1a86cdfb86ec1e48b03c14945c92/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-355/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/98b91a90a922.jpg" alt="Group of metalwares, to include iron shoe lasts, contained i..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/98b91a90a922.jpg" alt="Group of metalwares, to include iron shoe lasts, contained i..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Group of metalwares, to include iron shoe lasts, contained i...</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5698,7 +5744,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/2f6b630b136029a6c5bb697c4617e4e0/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-364/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/2f8a4a0338fb.jpg" alt="Armitage Shanks of Belfast basin on a vintage pine stand. (2..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/2f8a4a0338fb.jpg" alt="Armitage Shanks of Belfast basin on a vintage pine stand. (2..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Armitage Shanks of Belfast basin on a vintage pine stand. (2...</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5707,7 +5753,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5bf7e17e5f1ee1afb3fef62e3c9870bb/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-374/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/f63a690d3923.jpg" alt="Victorian pine box." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/f63a690d3923.jpg" alt="Victorian pine box." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Victorian pine box.</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5716,7 +5762,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5cb27e06ae4ddeeb6caee885ffcc668d/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-375/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/b7f7e4140e50.jpg" alt="Antique painted pine blanket box." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/b7f7e4140e50.jpg" alt="Antique painted pine blanket box." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Antique painted pine blanket box.</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5725,7 +5771,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/732dfa16879629fc46135f9f0fec6592/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-382/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/73d6ef396cd1.jpg" alt="Pine kitchen table." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/73d6ef396cd1.jpg" alt="Pine kitchen table." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine kitchen table.</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5734,7 +5780,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/380d677bd02b503b1b65a427c45008e6/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-392/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/054204b65f18.jpg" alt="Antique pine childs lambing chair, and another farmhouse chi..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/054204b65f18.jpg" alt="Antique pine childs lambing chair, and another farmhouse chi..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Antique pine childs lambing chair, and another farmhouse chi...</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5743,7 +5789,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/7e9570e5393144d70f37d010d348004d/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-412/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/06b6735dcc41.jpg" alt="Pine kitchen dresser on cupboard base." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/06b6735dcc41.jpg" alt="Pine kitchen dresser on cupboard base." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine kitchen dresser on cupboard base.</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5752,7 +5798,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/963779e60e00ff7b0dde1ff93ffdab5c/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-418/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/6854051b2ed0.jpg" alt="Pine wall shelves, with two drawers to the base." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/6854051b2ed0.jpg" alt="Pine wall shelves, with two drawers to the base." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine wall shelves, with two drawers to the base.</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5772,7 +5818,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/26db27d38ddead1b0b89e7207faacdfc/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-419/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/7d5c1c75321f.jpg" alt="Pine circular kitchen table, with set of four Gothic themed ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/7d5c1c75321f.jpg" alt="Pine circular kitchen table, with set of four Gothic themed ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine circular kitchen table, with set of four Gothic themed ...</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5781,7 +5827,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/9fc7c7d24946c43c2cea2bd94e18d133/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-425/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/38181241ad3d.jpg" alt="Two pine bedside cupboards." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/38181241ad3d.jpg" alt="Two pine bedside cupboards." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Two pine bedside cupboards.</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5790,7 +5836,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/1ae033d706bbb5e088929a9b3321042f/0af8d24542e81eb9357e7ef448a6646f/dumfries-fishing-tackle-sporting-collectables-home-lot-435/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/8df6bed06722.jpg" alt="Pine travel chest, bearing name in lettering to "LT. Col. J...." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/8df6bed06722.jpg" alt="Pine travel chest, bearing name in lettering to "LT. Col. J...." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine travel chest, bearing name in lettering to "LT. Col. J....</p>
         <p class="house-line"><span class="house" data-tip="📍 EH24 9AL · The Auction Centre, Carnethie Street, Rosewell · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EH24+9AL','_blank'); ">Thomson Roddick Calla... <span class="pc">EH24 9AL</span></span></p>
@@ -5799,7 +5845,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/51f2051a77a6099e017096cd4a063e6c/0af8d24542e81eb9357e7ef448a6646f/corfe-mullen-express-timed-sale-furniture-and-interior-lot-51/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/6f0fc7c101f8.jpg" alt="Pine two door wardrobe" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/6f0fc7c101f8.jpg" alt="Pine two door wardrobe" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine two door wardrobe</p>
         <p class="house-line"><span class="house" data-tip="📍 BH21 1HB · Stone Lane Industrial Estate, Wimborne · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BH21+1HB','_blank'); ">Elliotts UK Auctionee... <span class="pc">BH21 1HB</span></span></p>
@@ -5810,7 +5856,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/32a2d16b31d0f08ddf3a5c9d3c0a5c27/0af8d24542e81eb9357e7ef448a6646f/corfe-mullen-express-timed-sale-furniture-and-interior-lot-53/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/9310da7bc71a.jpg" alt="Pine two door narrow wardrobe (no handles)" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/9310da7bc71a.jpg" alt="Pine two door narrow wardrobe (no handles)" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Pine two door narrow wardrobe (no handles)</p>
         <p class="house-line"><span class="house" data-tip="📍 BH21 1HB · Stone Lane Industrial Estate, Wimborne · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BH21+1HB','_blank'); ">Elliotts UK Auctionee... <span class="pc">BH21 1HB</span></span></p>
@@ -5821,7 +5867,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/c1a7a4540114f331c3ab5782ad1d1397/0af8d24542e81eb9357e7ef448a6646f/corfe-mullen-express-timed-sale-furniture-and-interior-lot-135/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/27138856d33b.jpg" alt="Suede and pine pommel horse" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/27138856d33b.jpg" alt="Suede and pine pommel horse" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Suede and pine pommel horse</p>
         <p class="house-line"><span class="house" data-tip="📍 BH21 1HB · Stone Lane Industrial Estate, Wimborne · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BH21+1HB','_blank'); ">Elliotts UK Auctionee... <span class="pc">BH21 1HB</span></span></p>
@@ -5953,7 +5999,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/bf6786072e04b317c25dd049544fd136/0af8d24542e81eb9357e7ef448a6646f/antiques-collectibles-and-general-monthly-auction-450-lot-403/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/fc1b68d6bef4.jpg" alt="Antique Elm and Pine Low Stool." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/fc1b68d6bef4.jpg" alt="Antique Elm and Pine Low Stool." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Antique Elm and Pine Low Stool.</p>
         <p class="house-line"><span class="house" data-tip="📍 SP3 6JB · The Chapel Tuckingmill, Tisbury, Wiltshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SP3+6JB','_blank'); ">Acanthus Auctions Ltd <span class="pc">SP3 6JB</span></span></p>
@@ -5964,7 +6010,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/4f051f0573093757b9ea3630cae28edd/0af8d24542e81eb9357e7ef448a6646f/antiques-collectibles-and-general-monthly-auction-450-lot-407/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/2a6488beecc8.jpg" alt="Vintage Pine Stool. Oval Form Thick Seat. H 55cm" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/2a6488beecc8.jpg" alt="Vintage Pine Stool. Oval Form Thick Seat. H 55cm" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Vintage Pine Stool. Oval Form Thick Seat. H 55cm</p>
         <p class="house-line"><span class="house" data-tip="📍 SP3 6JB · The Chapel Tuckingmill, Tisbury, Wiltshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SP3+6JB','_blank'); ">Acanthus Auctions Ltd <span class="pc">SP3 6JB</span></span></p>
@@ -5975,7 +6021,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/fd94427780a79066c6b5b2458b93d3a9/0af8d24542e81eb9357e7ef448a6646f/antiques-collectibles-and-general-monthly-auction-450-lot-415/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/d7bcfb53cd02.jpg" alt="Tall Good Sized Waxed Antique Pine Bookshelf. H 200cm x W 94..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/d7bcfb53cd02.jpg" alt="Tall Good Sized Waxed Antique Pine Bookshelf. H 200cm x W 94..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Tall Good Sized Waxed Antique Pine Bookshelf. H 200cm x W 94...</p>
         <p class="house-line"><span class="house" data-tip="📍 SP3 6JB · The Chapel Tuckingmill, Tisbury, Wiltshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SP3+6JB','_blank'); ">Acanthus Auctions Ltd <span class="pc">SP3 6JB</span></span></p>
@@ -5984,7 +6030,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/bd92e0c5a941133978710976b34a9f80/0af8d24542e81eb9357e7ef448a6646f/antiques-collectibles-and-general-monthly-auction-450-lot-415a/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/76347523197e.jpg" alt="Good Quality Striped and Waxed Pine Singular Wardrobe over a..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/76347523197e.jpg" alt="Good Quality Striped and Waxed Pine Singular Wardrobe over a..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Good Quality Striped and Waxed Pine Singular Wardrobe over a...</p>
         <p class="house-line"><span class="house" data-tip="📍 SP3 6JB · The Chapel Tuckingmill, Tisbury, Wiltshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SP3+6JB','_blank'); ">Acanthus Auctions Ltd <span class="pc">SP3 6JB</span></span></p>
@@ -6039,7 +6085,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/94fdd8bc981c098c37269f9ed172c53d/1f1638c9faeb7c2641b7b1e9c67628d0/two-day-auction-of-collectables-antiques-jewellery-f-lot-2539/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A VICTORIAN PITCH PINE CAMPAIGN STYLE CHEST OF THREE GRADUAT..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A VICTORIAN PITCH PINE CAMPAIGN STYLE CHEST OF THREE GRADUAT..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A VICTORIAN PITCH PINE CAMPAIGN STYLE CHEST OF THREE GRADUAT...</p>
         <p class="house-line"><span class="house" data-tip="📍 SK11 9DU · Four Oaks, Lower Withington, Cheshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SK11+9DU','_blank'); ">Ashley Waller Ltd <span class="pc">SK11 9DU</span></span></p>
@@ -6050,7 +6096,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/e58a128bfeb1c3bf32a66a3d4f2e6592/1f1638c9faeb7c2641b7b1e9c67628d0/two-day-auction-of-collectables-antiques-jewellery-f-lot-2541/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A VINTAGE PINE TWO DRAWER SIDE TABLE ON TURNED LEGS, 44" WID..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A VINTAGE PINE TWO DRAWER SIDE TABLE ON TURNED LEGS, 44" WID..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A VINTAGE PINE TWO DRAWER SIDE TABLE ON TURNED LEGS, 44" WID...</p>
         <p class="house-line"><span class="house" data-tip="📍 SK11 9DU · Four Oaks, Lower Withington, Cheshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SK11+9DU','_blank'); ">Ashley Waller Ltd <span class="pc">SK11 9DU</span></span></p>
@@ -6061,7 +6107,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/51fe1e402f4af76925c5e1db3d34bc20/1f1638c9faeb7c2641b7b1e9c67628d0/two-day-auction-of-collectables-antiques-jewellery-f-lot-2542/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A VINTAGE PINE TWIN PEDESTAL DESK ENCLOSING THREE DRAWERS AN..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A VINTAGE PINE TWIN PEDESTAL DESK ENCLOSING THREE DRAWERS AN..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A VINTAGE PINE TWIN PEDESTAL DESK ENCLOSING THREE DRAWERS AN...</p>
         <p class="house-line"><span class="house" data-tip="📍 SK11 9DU · Four Oaks, Lower Withington, Cheshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SK11+9DU','_blank'); ">Ashley Waller Ltd <span class="pc">SK11 9DU</span></span></p>
@@ -6072,7 +6118,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/dafef1f130f7a1b4ead4cd070c0f49ef/1f1638c9faeb7c2641b7b1e9c67628d0/two-day-auction-of-collectables-antiques-jewellery-f-lot-2545/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A PITCH PINE VICTORIAN STYLE CRIB/CRADLE" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A PITCH PINE VICTORIAN STYLE CRIB/CRADLE" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A PITCH PINE VICTORIAN STYLE CRIB/CRADLE</p>
         <p class="house-line"><span class="house" data-tip="📍 SK11 9DU · Four Oaks, Lower Withington, Cheshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SK11+9DU','_blank'); ">Ashley Waller Ltd <span class="pc">SK11 9DU</span></span></p>
@@ -6083,7 +6129,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/00d6624c7ac67be8814f45b0281d14b3/1f1638c9faeb7c2641b7b1e9c67628d0/two-day-auction-of-collectables-antiques-jewellery-f-lot-2546/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/71b4ecb6e640.jpg" alt="A VICTORIAN STYLE PINE GALLERY BACK WASHSTAND WITH INSET LEA..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/71b4ecb6e640.jpg" alt="A VICTORIAN STYLE PINE GALLERY BACK WASHSTAND WITH INSET LEA..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A VICTORIAN STYLE PINE GALLERY BACK WASHSTAND WITH INSET LEA...</p>
         <p class="house-line"><span class="house" data-tip="📍 SK11 9DU · Four Oaks, Lower Withington, Cheshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SK11+9DU','_blank'); ">Ashley Waller Ltd <span class="pc">SK11 9DU</span></span></p>
@@ -6094,7 +6140,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/8033d606c2c1da1236afbcf15465b7f2/1f1638c9faeb7c2641b7b1e9c67628d0/two-day-auction-of-collectables-antiques-jewellery-f-lot-2582/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A LOW PINE CHEST OF TWO SHORT AND ONE LONG DRAWER, 36" WIDE" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A LOW PINE CHEST OF TWO SHORT AND ONE LONG DRAWER, 36" WIDE" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A LOW PINE CHEST OF TWO SHORT AND ONE LONG DRAWER, 36" WIDE</p>
         <p class="house-line"><span class="house" data-tip="📍 SK11 9DU · Four Oaks, Lower Withington, Cheshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SK11+9DU','_blank'); ">Ashley Waller Ltd <span class="pc">SK11 9DU</span></span></p>
@@ -6105,7 +6151,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/1aa82d49894707efa9871b9df17961b5/1f1638c9faeb7c2641b7b1e9c67628d0/two-day-auction-of-collectables-antiques-jewellery-f-lot-2604/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A PAIR OF PINE EFFECT OPEN BOOKCASES, 31.5" WIDE EACH" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/59fbbb6763c2.jpg" alt="A PAIR OF PINE EFFECT OPEN BOOKCASES, 31.5" WIDE EACH" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A PAIR OF PINE EFFECT OPEN BOOKCASES, 31.5" WIDE EACH</p>
         <p class="house-line"><span class="house" data-tip="📍 SK11 9DU · Four Oaks, Lower Withington, Cheshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SK11+9DU','_blank'); ">Ashley Waller Ltd <span class="pc">SK11 9DU</span></span></p>
@@ -6116,7 +6162,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/1dcb38df79758b2d1b0cf526e039e3ef/1f1638c9faeb7c2641b7b1e9c67628d0/two-day-auction-of-collectables-antiques-jewellery-f-lot-2715/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/41da8bcf63b6.jpg" alt="A PINE CORNER CUPBOARD WITH GLAZED DOOR, 26.5" WIDE" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/41da8bcf63b6.jpg" alt="A PINE CORNER CUPBOARD WITH GLAZED DOOR, 26.5" WIDE" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A PINE CORNER CUPBOARD WITH GLAZED DOOR, 26.5" WIDE</p>
         <p class="house-line"><span class="house" data-tip="📍 SK11 9DU · Four Oaks, Lower Withington, Cheshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SK11+9DU','_blank'); ">Ashley Waller Ltd <span class="pc">SK11 9DU</span></span></p>
@@ -6127,7 +6173,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/fa076e79e1d34b39ad76ec9526aa9db8/1f1638c9faeb7c2641b7b1e9c67628d0/two-day-auction-of-collectables-antiques-jewellery-f-lot-2727/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/25030df11dbb.jpg" alt="A STAINED PINE CABINET WITH GLAZED AND LEADED DOOR AND TWO D..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/25030df11dbb.jpg" alt="A STAINED PINE CABINET WITH GLAZED AND LEADED DOOR AND TWO D..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A STAINED PINE CABINET WITH GLAZED AND LEADED DOOR AND TWO D...</p>
         <p class="house-line"><span class="house" data-tip="📍 SK11 9DU · Four Oaks, Lower Withington, Cheshire · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SK11+9DU','_blank'); ">Ashley Waller Ltd <span class="pc">SK11 9DU</span></span></p>
@@ -6574,7 +6620,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/29ffe9b5e0018d8d3b818775b62477aa/0af8d24542e81eb9357e7ef448a6646f/fine-art-antiques-lot-51/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/5f715a8c80dd.jpg" alt="A LATE 19TH/EARLY 20TH CENTURY COOPERED PINE AND IRON BOUND ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/5f715a8c80dd.jpg" alt="A LATE 19TH/EARLY 20TH CENTURY COOPERED PINE AND IRON BOUND ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A LATE 19TH/EARLY 20TH CENTURY COOPERED PINE AND IRON BOUND ...</p>
         <p class="house-line"><span class="house" data-tip="📍 HG1 1JL · 6 Albert Street, Harrogate · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=HG1+1JL','_blank'); ">Morphets of Harrogate... <span class="pc">HG1 1JL</span></span></p>
@@ -7260,7 +7306,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/64a47b6569b62f57d52f8a22c28ab806/0af8d24542e81eb9357e7ef448a6646f/general-sale-lot-441/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/4fdd7ee95b03.jpg" alt="Antique Pine Chest of Drawers" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/4fdd7ee95b03.jpg" alt="Antique Pine Chest of Drawers" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Antique Pine Chest of Drawers</p>
         <p class="house-line"><span class="house" data-tip="📍 AB10 1RJ · 9-11 North Silver Street, Aberdeen · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=AB10+1RJ','_blank'); ">John Milne Auctioneer... <span class="pc">AB10 1RJ</span></span></p>
@@ -7282,7 +7328,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/00c00c04f30de2acb1706c31dc070548/1f1638c9faeb7c2641b7b1e9c67628d0/the-june-fine-art-antiques-auction-lot-518/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/2a4126fe6b14.jpg" alt="A large Chinese blue and white porcelain charger, 18th centu..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/2a4126fe6b14.jpg" alt="A large Chinese blue and white porcelain charger, 18th centu..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A large Chinese blue and white porcelain charger, 18th centu...</p>
         <p class="house-line"><span class="house" data-tip="📍 SY13 1RE · The Joyce Building, Station Road, Whitchurch · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SY13+1RE','_blank'); ">Trevanion <span class="pc">SY13 1RE</span></span></p>
@@ -7293,7 +7339,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/0007fb1f7590767bd5dad1a87842ed34/1f1638c9faeb7c2641b7b1e9c67628d0/the-june-fine-art-antiques-auction-lot-572/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/3a4aac18e4e7.jpg" alt="A rustic pine bread board, of circular design and raised on ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/3a4aac18e4e7.jpg" alt="A rustic pine bread board, of circular design and raised on ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A rustic pine bread board, of circular design and raised on ...</p>
         <p class="house-line"><span class="house" data-tip="📍 SY13 1RE · The Joyce Building, Station Road, Whitchurch · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SY13+1RE','_blank'); ">Trevanion <span class="pc">SY13 1RE</span></span></p>
@@ -7326,7 +7372,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/2565575270411dce32ac8fbaa55df672/0af8d24542e81eb9357e7ef448a6646f/antiques-collectables-sale-to-include-japanese-cerami-lot-70/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/f1e9e3e2c7f7.jpg" alt="A group of Japanese-style folding fans with lacquered and ba..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/f1e9e3e2c7f7.jpg" alt="A group of Japanese-style folding fans with lacquered and ba..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A group of Japanese-style folding fans with lacquered and ba...</p>
         <p class="house-line"><span class="house" data-tip="📍 BT53 6NR · 22 Kilmoyle Road, Ballybogey, Antrim · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BT53+6NR','_blank'); ">North Coast Auctions <span class="pc">BT53 6NR</span></span></p>
@@ -7385,7 +7431,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/6921682cc9045b4209403cfc87c062c5/0af8d24542e81eb9357e7ef448a6646f/a-timed-general-sale-to-include-antiques-furniture-ga-lot-2347/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/81ccc00ad4cc.jpg" alt="Decorative Monkey Ornament with Pineapple" width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/81ccc00ad4cc.jpg" alt="Decorative Monkey Ornament with Pineapple" width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">Decorative Monkey Ornament with Pineapple</p>
         <p class="house-line"><span class="house" data-tip="📍 BA4 4PW · Centurion Business Centre, Fosse Lane, Shepton Mallet · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BA4+4PW','_blank'); ">Fosse Lane Auction <span class="pc">BA4 4PW</span></span></p>
@@ -7396,7 +7442,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/cbd3ba0ee2d63c46c06d4a0c0ce5549e/0af8d24542e81eb9357e7ef448a6646f/sunday-afternoon-automatic-sales-jewellery-watches-d-lot-1491/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/395883c911ed.jpg" alt="A 9k yellow gold pineapple charm, 3.2g total weight. SH9058H..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/395883c911ed.jpg" alt="A 9k yellow gold pineapple charm, 3.2g total weight. SH9058H..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A 9k yellow gold pineapple charm, 3.2g total weight. SH9058H...</p>
         <p class="house-line"><span class="house" data-tip="📍 EN6 1TL · 3 Station Close, Potters Bar · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=EN6+1TL','_blank'); ">Cadmore Auctions <span class="pc">EN6 1TL</span></span></p>
@@ -7407,7 +7453,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/90d65dd5e81559966236ecd5d9f2a33c/0af8d24542e81eb9357e7ef448a6646f/live-auction-of-antiques-collectables-etc-lot-287/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/e7fb0f478c1a.jpg" alt="A mid-20th century novelty cigarette lighter designed in the..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/e7fb0f478c1a.jpg" alt="A mid-20th century novelty cigarette lighter designed in the..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A mid-20th century novelty cigarette lighter designed in the...</p>
         <p class="house-line"><span class="house" data-tip="📍 BB4 5HL · Prinny Mill Business Centre, Haslingden · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BB4+5HL','_blank'); ">Red Rose Auctions Ltd <span class="pc">BB4 5HL</span></span></p>
@@ -7416,7 +7462,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/f06fcc391990e9dcd55a5f73c8ade709/0af8d24542e81eb9357e7ef448a6646f/live-auction-of-antiques-collectables-etc-lot-288/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/696f0cbf4a43.jpg" alt="A mid-20th century novelty cigarette lighter designed in the..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/696f0cbf4a43.jpg" alt="A mid-20th century novelty cigarette lighter designed in the..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A mid-20th century novelty cigarette lighter designed in the...</p>
         <p class="house-line"><span class="house" data-tip="📍 BB4 5HL · Prinny Mill Business Centre, Haslingden · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=BB4+5HL','_blank'); ">Red Rose Auctions Ltd <span class="pc">BB4 5HL</span></span></p>
@@ -7456,7 +7502,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/5f0b7b24a53ddd3fed3b1e31d99b9082/0af8d24542e81eb9357e7ef448a6646f/fine-art-antiques-lot-206/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/2c878b9df8f8.jpg" alt="A MID-19TH CENTURY FRENCH SILVER .900 LIDDED JUG, Paris for ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/2c878b9df8f8.jpg" alt="A MID-19TH CENTURY FRENCH SILVER .900 LIDDED JUG, Paris for ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A MID-19TH CENTURY FRENCH SILVER .900 LIDDED JUG, Paris for ...</p>
         <p class="house-line"><span class="house" data-tip="📍 HG1 1JL · 6 Albert Street, Harrogate · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=HG1+1JL','_blank'); ">Morphets of Harrogate... <span class="pc">HG1 1JL</span></span></p>
@@ -7467,7 +7513,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/1bd255a696c2ebf6cb14aa9308046d31/1f1638c9faeb7c2641b7b1e9c67628d0/the-june-fine-art-antiques-auction-lot-574/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/9066a15829f4.jpg" alt="A vintage kitchen spice cabinet, the pine carcass enclosing ..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/9066a15829f4.jpg" alt="A vintage kitchen spice cabinet, the pine carcass enclosing ..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A vintage kitchen spice cabinet, the pine carcass enclosing ...</p>
         <p class="house-line"><span class="house" data-tip="📍 SY13 1RE · The Joyce Building, Station Road, Whitchurch · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SY13+1RE','_blank'); ">Trevanion <span class="pc">SY13 1RE</span></span></p>
@@ -7478,7 +7524,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/bf40a687ef30b0460399c20e30c80092/1f1638c9faeb7c2641b7b1e9c67628d0/the-june-fine-art-antiques-auction-lot-694/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/6d4fe2acad96.jpg" alt="An Italian 18th century style painted pine console table, th..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/6d4fe2acad96.jpg" alt="An Italian 18th century style painted pine console table, th..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">An Italian 18th century style painted pine console table, th...</p>
         <p class="house-line"><span class="house" data-tip="📍 SY13 1RE · The Joyce Building, Station Road, Whitchurch · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SY13+1RE','_blank'); ">Trevanion <span class="pc">SY13 1RE</span></span></p>
@@ -7489,7 +7535,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/827d696409ab0b9152ee6cdc4df23236/1f1638c9faeb7c2641b7b1e9c67628d0/the-june-fine-art-antiques-auction-lot-731/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/991c0e43664b.jpg" alt="A large Victorian pine housekeepers cupboard, the top design..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/991c0e43664b.jpg" alt="A large Victorian pine housekeepers cupboard, the top design..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A large Victorian pine housekeepers cupboard, the top design...</p>
         <p class="house-line"><span class="house" data-tip="📍 SY13 1RE · The Joyce Building, Station Road, Whitchurch · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SY13+1RE','_blank'); ">Trevanion <span class="pc">SY13 1RE</span></span></p>
@@ -7500,7 +7546,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/6d24e191bb3532b4763c58176d8e3e0a/1f1638c9faeb7c2641b7b1e9c67628d0/the-june-fine-art-antiques-auction-lot-760/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/c39b9e46e114.jpg" alt="An early 20th century provincial pine bench, estate made, th..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/c39b9e46e114.jpg" alt="An early 20th century provincial pine bench, estate made, th..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">An early 20th century provincial pine bench, estate made, th...</p>
         <p class="house-line"><span class="house" data-tip="📍 SY13 1RE · The Joyce Building, Station Road, Whitchurch · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SY13+1RE','_blank'); ">Trevanion <span class="pc">SY13 1RE</span></span></p>
@@ -7808,7 +7854,7 @@
     </a>
 
     <a class="card" href="https://www.easyliveauction.com/catalogue/lot/417f592104eded666889dd73aa07e84d/1f1638c9faeb7c2641b7b1e9c67628d0/the-june-fine-art-antiques-auction-lot-607/" target="_blank" rel="noopener">
-      <div class="card-img"><img src="images/74982c552dfd.jpg" alt="A Country House nickel plated coal bucket, of Adam style, th..." width="500" height="500" loading="lazy"><span class="new-badge">NEW</span></div>
+      <div class="card-img"><img src="images/74982c552dfd.jpg" alt="A Country House nickel plated coal bucket, of Adam style, th..." width="500" height="500" loading="lazy"></div>
       <div class="card-body">
         <p class="title">A Country House nickel plated coal bucket, of Adam style, th...</p>
         <p class="house-line"><span class="house" data-tip="📍 SY13 1RE · The Joyce Building, Station Road, Whitchurch · click for map" onclick="event.preventDefault(); event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=SY13+1RE','_blank'); ">Trevanion <span class="pc">SY13 1RE</span></span></p>
@@ -7871,6 +7917,81 @@
         const isNew = c.querySelector('.new-badge');
         c.style.display = (newOnly && !isNew) ? 'none' : '';
       });
+    }
+    
+    function normalizeSearch(text) {
+      return text
+        .replace(/cupboards?/gi, 'cupboard')
+        .replace(/chests?/gi, 'chest')
+        .replace(/drawers?/gi, 'drawer')
+        .replace(/tables?/gi, 'table')
+        .replace(/chairs?/gi, 'chair')
+        .replace(/cabinets?/gi, 'cabinet')
+        .replace(/bedsides?/gi, 'bedside')
+        .replace(/wardrobes?/gi, 'wardrobe')
+        .replace(/dressers?/gi, 'dresser')
+        .replace(/shelves?/gi, 'shelf')
+        .replace(/bookcase(s)?/gi, 'bookcase');
+    }
+    
+    function searchItems() {
+      const input = document.getElementById('searchInput');
+      const query = input.value.toLowerCase().trim();
+      const searchBox = document.getElementById('searchBox');
+      const resultsEl = document.getElementById('searchResults');
+      
+      if (query) {
+        searchBox.classList.add('has-text');
+      } else {
+        searchBox.classList.remove('has-text');
+      }
+      
+      if (!query) {
+        document.querySelectorAll('.card').forEach(c => {
+          if (newOnly && !c.querySelector('.new-badge')) {
+            c.style.display = 'none';
+          } else {
+            c.style.display = '';
+          }
+        });
+        resultsEl.textContent = '';
+        return;
+      }
+      
+      const normalizedQuery = normalizeSearch(query);
+      let visibleCount = 0;
+      let totalCount = 0;
+      
+      document.querySelectorAll('.card').forEach(card => {
+        totalCount++;
+        const titleEl = card.querySelector('.title');
+        if (!titleEl) return;
+        
+        const title = titleEl.textContent.toLowerCase();
+        const normalizedTitle = normalizeSearch(title);
+        
+        const queryWords = normalizedQuery.split(/\s+/);
+        const matches = queryWords.every(word => normalizedTitle.includes(word));
+        
+        if (matches) {
+          if (newOnly && !card.querySelector('.new-badge')) {
+            card.style.display = 'none';
+          } else {
+            card.style.display = '';
+            visibleCount++;
+          }
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      resultsEl.innerHTML = `<strong>${visibleCount}</strong> of ${totalCount} lots`;
+    }
+    
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      searchItems();
+      document.getElementById('searchInput').focus();
     }
   </script>
 </body>

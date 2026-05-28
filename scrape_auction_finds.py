@@ -489,6 +489,47 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
       font-size: 0.85rem; font-family: inherit;
     }}
     .theme-toggle:hover {{ background: var(--accent); color: var(--panel); }}
+    
+    .search-box {{
+      flex: 1;
+      min-width: 200px;
+      max-width: 400px;
+      position: relative;
+    }}
+    .search-box input {{
+      width: 100%;
+      padding: 8px 36px 8px 12px;
+      border: 1px solid var(--accent-soft);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }}
+    .search-box input:focus {{ border-color: var(--accent); }}
+    .search-box input::placeholder {{ color: var(--muted); }}
+    .search-box .clear-btn {{
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      display: none;
+    }}
+    .search-box.has-text .clear-btn {{ display: block; }}
+    .search-results {{
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-left: 8px;
+    }}
+    .search-results strong {{ color: var(--accent); }}
 
     nav.jump {{
       max-width: 1500px; margin: 24px auto 0; padding: 0 24px;
@@ -649,6 +690,11 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
 <body>
   <header>
     <div class="brand"><span class="logo">🩵</span><h1>Pinefinders Auction Finds</h1></div>
+    <div class="search-box" id="searchBox">
+      <input type="text" id="searchInput" placeholder="🔍 Search items (e.g. bedside cupboard, chest of drawers...)" oninput="searchItems()">
+      <button class="clear-btn" onclick="clearSearch()" title="Clear search">✕</button>
+    </div>
+    <span class="search-results" id="searchResults"></span>
     <span class="meta"><strong>{total} lots</strong> · {today_total} today · {new_total} new since yesterday · Updated {now}</span>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
     <nav class="jump">
@@ -692,6 +738,81 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
         const isNew = c.querySelector('.new-badge');
         c.style.display = (newOnly && !isNew) ? 'none' : '';
       }});
+    }}
+    
+    function normalizeSearch(text) {{
+      return text
+        .replace(/cupboards?/gi, 'cupboard')
+        .replace(/chests?/gi, 'chest')
+        .replace(/drawers?/gi, 'drawer')
+        .replace(/tables?/gi, 'table')
+        .replace(/chairs?/gi, 'chair')
+        .replace(/cabinets?/gi, 'cabinet')
+        .replace(/bedsides?/gi, 'bedside')
+        .replace(/wardrobes?/gi, 'wardrobe')
+        .replace(/dressers?/gi, 'dresser')
+        .replace(/shelves?/gi, 'shelf')
+        .replace(/bookcase(s)?/gi, 'bookcase');
+    }}
+    
+    function searchItems() {{
+      const input = document.getElementById('searchInput');
+      const query = input.value.toLowerCase().trim();
+      const searchBox = document.getElementById('searchBox');
+      const resultsEl = document.getElementById('searchResults');
+      
+      if (query) {{
+        searchBox.classList.add('has-text');
+      }} else {{
+        searchBox.classList.remove('has-text');
+      }}
+      
+      if (!query) {{
+        document.querySelectorAll('.card').forEach(c => {{
+          if (newOnly && !c.querySelector('.new-badge')) {{
+            c.style.display = 'none';
+          }} else {{
+            c.style.display = '';
+          }}
+        }});
+        resultsEl.textContent = '';
+        return;
+      }}
+      
+      const normalizedQuery = normalizeSearch(query);
+      let visibleCount = 0;
+      let totalCount = 0;
+      
+      document.querySelectorAll('.card').forEach(card => {{
+        totalCount++;
+        const titleEl = card.querySelector('.title');
+        if (!titleEl) return;
+        
+        const title = titleEl.textContent.toLowerCase();
+        const normalizedTitle = normalizeSearch(title);
+        
+        const queryWords = normalizedQuery.split(/\s+/);
+        const matches = queryWords.every(word => normalizedTitle.includes(word));
+        
+        if (matches) {{
+          if (newOnly && !card.querySelector('.new-badge')) {{
+            card.style.display = 'none';
+          }} else {{
+            card.style.display = '';
+            visibleCount++;
+          }}
+        }} else {{
+          card.style.display = 'none';
+        }}
+      }});
+      
+      resultsEl.innerHTML = `<strong>${{visibleCount}}</strong> of ${{totalCount}} lots`;
+    }}
+    
+    function clearSearch() {{
+      document.getElementById('searchInput').value = '';
+      searchItems();
+      document.getElementById('searchInput').focus();
     }}
   </script>
 </body>
