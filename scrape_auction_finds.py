@@ -141,6 +141,13 @@ def parse_card(card):
                 time_left = txt.replace("Time Left:", "").strip()
                 break
 
+    # Lot number - extract from URL like "/lot-409/"
+    lot_number = ""
+    if url:
+        lot_match = re.search(r'/lot-(\d+)/?', url)
+        if lot_match:
+            lot_number = lot_match.group(1)
+
     return {
         "id":         lot_id,
         "auction_id": auction_id,
@@ -155,6 +162,7 @@ def parse_card(card):
         "img_url":    img_url,
         "img_file":   image_filename(img_url) if img_url else "",
         "local":     is_local(house),
+        "lot_number": lot_number,
     }
 
 
@@ -370,13 +378,15 @@ def _card_html(lot, is_new, postcodes):
     else:
         house_html_str = f'<span class="house unknown" data-tip="📍 postcode unknown">{lot["house"]} <span class="pc-unknown">?</span></span>'
 
+    lot_num_html = f'<span class="lot-number">Lot {lot["lot_number"]}</span>' if lot.get("lot_number") else ""
+
     return f"""
     <a class="card" href="{lot['url']}" target="_blank" rel="noopener">
       <div class="card-img">{img_tag}{new_badge}</div>
       <div class="card-body">
         <p class="title">{lot['title']}</p>
         <p class="house-line">{house_html_str}</p>
-        <div class="meta">{bid}{estimate}{saledate_html}</div>
+        <div class="meta">{lot_num_html}{bid}{estimate}{saledate_html}</div>
       </div>
     </a>"""
 
