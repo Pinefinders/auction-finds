@@ -141,10 +141,10 @@ def parse_card(card):
                 time_left = txt.replace("Time Left:", "").strip()
                 break
 
-    # Lot number - extract from URL like "/lot-409/"
+    # Lot number - extract from URL like "...-lot-409/"
     lot_number = ""
     if url:
-        lot_match = re.search(r'/lot-(\d+)/?', url)
+        lot_match = re.search(r'-lot-(\d+)/?', url)
         if lot_match:
             lot_number = lot_match.group(1)
 
