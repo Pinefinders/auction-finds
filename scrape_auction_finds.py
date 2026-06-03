@@ -500,6 +500,18 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
     }}
     .theme-toggle:hover {{ background: var(--accent); color: var(--panel); }}
     
+    .courier-link {{
+      background: var(--accent); color: var(--panel);
+      border: none; cursor: pointer;
+      padding: 7px 14px; border-radius: 6px;
+      font-size: 0.85rem; font-family: inherit;
+      text-decoration: none;
+      display: inline-block;
+      font-weight: 500;
+      transition: all 0.15s;
+    }}
+    .courier-link:hover {{ background: var(--ink); color: var(--panel); box-shadow: var(--shadow-hover); }}
+    
     .search-box {{
       flex: 1;
       min-width: 200px;
@@ -706,6 +718,7 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
     </div>
     <span class="search-results" id="searchResults"></span>
     <span class="meta"><strong>{total} lots</strong> · {today_total} today · {new_total} new since yesterday · Updated {now}</span>
+    <a href="https://my.proovia.delivery/dashboard" target="_blank" rel="noopener" class="courier-link">🚚 Proovia Couriers</a>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
     <nav class="jump">
       <a href="#local">📍 Local · {len(local_lots)}</a>
