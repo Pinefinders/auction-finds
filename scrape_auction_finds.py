@@ -842,6 +842,26 @@ def build_html(local_lots, wide_lots, seen=None, postcodes=None):
 </html>"""
 
 
+def sweep_orphan_images(all_lots):
+    """Delete image files in IMAGES_DIR not referenced by any current lot.
+    A file only becomes orphaned AFTER its lot has left the data (i.e. the
+    auction ended and the scrape no longer returns it), so this keeps
+    images/ aligned with live lots. seen_lots.json is never touched.
+    """
+    referenced = {lot["img_file"] for lot in all_lots.values() if lot.get("img_file")}
+    removed = 0
+    freed = 0
+    for p in IMAGES_DIR.iterdir():
+        if p.is_file() and p.name not in referenced:
+            try:
+                freed += p.stat().st_size
+                p.unlink()
+                removed += 1
+            except OSError as e:
+                log.warning(f"Could not remove orphan {p.name}: {e}")
+    log.info(f"Orphan sweep: removed {removed} images ({freed/1e6:.1f} MB freed)")
+
+
 def git_push(repo_dir):
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
     for cmd in [
@@ -977,6 +997,9 @@ def main():
         updated_seen = set(list(all_lots.keys())) | set(list(seen))[: 5000 - len(all_lots)]
     save_seen(updated_seen)
     log.info(f"Updated seen_lots.json ({len(updated_seen)} ids)")
+
+    # Keep images/ aligned with live lots (delete ended-auction leftovers)
+    sweep_orphan_images(all_lots)
 
     log.info("Pushing to GitHub…")
     git_push(REPO_DIR)
