@@ -37,7 +37,12 @@ LOCAL_HOUSES = [
 
 EASYLIVE_BASE = "https://www.easyliveauction.com"
 SEARCH_URL    = f"{EASYLIVE_BASE}/catalogue/"
-REPO_DIR      = Path(os.path.expanduser("~/auction-finds"))
+# On GitHub Actions, GITHUB_WORKSPACE is the checked-out repo root.
+# Locally, fall back to ~/auction-finds.
+if os.environ.get("GITHUB_WORKSPACE"):
+    REPO_DIR = Path(os.environ["GITHUB_WORKSPACE"])
+else:
+    REPO_DIR = Path(os.path.expanduser("~/auction-finds"))
 IMAGES_DIR    = REPO_DIR / "images"
 SEEN_FILE     = REPO_DIR / "seen_lots.json"
 POSTCODES_FILE = REPO_DIR / "house_postcodes.json"
@@ -863,6 +868,10 @@ def sweep_orphan_images(all_lots):
 
 
 def git_push(repo_dir):
+    # Under GitHub Actions the workflow handles commit/push; skip here.
+    if os.environ.get("GITHUB_ACTIONS"):
+        log.info("Git: running under GitHub Actions — workflow handles commit/push, skipping.")
+        return
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
     for cmd in [
         ["git", "-C", str(repo_dir), "add", "-A"],
