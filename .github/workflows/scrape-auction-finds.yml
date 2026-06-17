@@ -7,8 +7,9 @@ name: Scrape Auction Finds
 
 on:
   schedule:
-    # 05:00 UTC daily (matches the old Mac 05:00 cron timing).
-    - cron: '0 5 * * *'
+    # 00:00 UTC daily (01:00 BST summer, 00:00 GMT winter) — runs early
+    # so the data is ready for Ken's 09:00 check regardless of queue delays.
+    - cron: '0 0 * * *'
   workflow_dispatch: {}
 
 permissions:
