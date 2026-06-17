@@ -7,9 +7,11 @@ name: Scrape Auction Finds
 
 on:
   schedule:
-    # 00:00 UTC daily (01:00 BST summer, 00:00 GMT winter) — runs early
-    # so the data is ready for Ken's 09:00 check regardless of queue delays.
-    - cron: '0 0 * * *'
+    # 05:17 UTC daily — deliberately an odd, off-peak minute. GitHub
+    # heavily throttles/skips scheduled runs queued on busy slots like
+    # '0 0' (midnight, top of hour). 05:17 = 06:17 BST / 05:17 GMT, well
+    # before Ken's 09:00 check and far from congested cron minutes.
+    - cron: '17 5 * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -24,12 +26,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -54,4 +56,5 @@ jobs:
             exit 0
           fi
           git commit -m "Auto update: $(date -u '+%Y-%m-%d %H:%M UTC')"
-          git push
+          git pull --rebase --autostash
+          git push --force-with-lease
